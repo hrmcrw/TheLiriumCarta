@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050a05">
+    <title>The Lirium - Carta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #050a05;
+            --gold: #d4af37;
+            --gold-light: #fcf6ba;
+            --gold-glow: rgba(212, 175, 55, 0.6);
+            --text-color: #f4ecd8;
+            --card-bg: rgba(15, 20, 15, 0.78);
+            --gold-gradient: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'EB Garamond', serif;
+            font-size: 18px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* =========================================
+           1. FONDO (funciona también en iPhone)
+           ========================================= */
+        .parallax-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            background-image: url('fondovertical.png');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.35) sepia(0.2) hue-rotate(-10deg);
+        }
+
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            opacity: 0.15;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .gradient-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(circle at center, transparent 0%, #000000 100%);
+        }
+
+        #magic-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px var(--gold);
+            opacity: 0;
+            animation: floatUp linear infinite, twinkle ease-in-out infinite alternate;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) scale(0); opacity: 0; }
+            15% { opacity: 0.8; }
+            85% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+        @keyframes twinkle {
+            0% { box-shadow: 0 0 2px 1px rgba(212, 175, 55, 0.2); }
+            100% { box-shadow: 0 0 15px 5px var(--gold); }
+        }
+
+        /* =========================================
+           2. CONTENEDOR Y LOGOTIPO
+           ========================================= */
+        .menu-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.2)); }
+            50% { transform: scale(1.03); filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.2)); }
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            border-bottom: 2px solid var(--gold);
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px -10px var(--gold-glow);
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+
+        .logo-image-container {
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: breathe 6s ease-in-out infinite;
+        }
+
+        .logo-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));
+        }
+
+        /* =========================================
+           NAVEGACIÓN FIJA (PESTAÑAS + CATEGORÍAS)
+           ========================================= */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            margin: 0 -20px 10px;
+            padding: 12px 20px 10px;
+            background: rgba(5, 10, 5, 0.88);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            max-width: 240px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--gold);
+            background: transparent;
+            padding: 11px 12px;
+            border: 1.5px solid rgba(212, 175, 55, 0.6);
+            border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover { background: rgba(212, 175, 55, 0.12); }
+
+        .nav-btn.active-btn {
+            color: #000;
+            background: var(--gold-gradient);
+            border-color: #fff;
+            box-shadow: 0 0 16px rgba(212, 175, 55, 0.6);
+        }
+
+        /* Latido suave del botón inactivo: invita a tocarlo */
+        @keyframes latido {
+            0%, 100% {
+                background: transparent;
+                border-color: rgba(212, 175, 55, 0.55);
+                box-shadow: 0 0 0 rgba(212, 175, 55, 0);
+            }
+            50% {
+                background: rgba(212, 175, 55, 0.22);
+                border-color: rgba(252, 246, 186, 0.95);
+                box-shadow: 0 0 16px rgba(212, 175, 55, 0.65);
+            }
+        }
+        .nav-btn:not(.active-btn) { animation: latido 2.6s ease-in-out infinite; }
+
+        /* Las 4 categorías siempre caben en una fila, sin deslizar */
+        .chips {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .chips.oculto { display: none; }
+
+        .chip {
+            flex: 1 1 auto;
+            min-width: 0;
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: min(0.72rem, 2.6vw);
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            text-decoration: none;
+            padding: 6px 6px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 999px;
+            background: rgba(212, 175, 55, 0.07);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .chip:hover, .chip:active { background: var(--gold); color: #000; }
+
+        /* =========================================
+           SISTEMA DE PESTAÑAS (MOSTRAR/OCULTAR)
+           ========================================= */
+        .seccion-oculta { display: none; }
+
+        .seccion-visible {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =========================================
+           3. TÍTULOS Y PLATOS
+           ========================================= */
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            background: var(--gold-gradient);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+            text-align: center;
+            margin: 40px 0 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 2;
+            scroll-margin-top: 130px;
+        }
+
+        .section-title::after {
+            content: '❖'; display: block; font-size: 1rem; color: var(--gold);
+            margin-top: 5px; -webkit-text-fill-color: var(--gold);
+        }
+
+        .menu-item {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 12px; padding: 12px 15px;
+            background: var(--card-bg);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%23d4af37' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-left: 3px solid transparent;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease, background 0.4s ease;
+        }
+
+        .menu-item:hover, .menu-item:active {
+            border-left-color: var(--gold);
+            transform: scale(1.02);
+            background-color: rgba(25, 35, 25, 0.92);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.5), 0 0 10px var(--gold-glow);
+        }
+
+        .item-name { font-weight: 600; font-size: 1.15rem; padding-right: 10px; display: block; text-shadow: 1px 1px 2px #000; }
+        .item-desc { font-size: 1rem; color: #c4bba6; font-style: italic; display: block; margin-top: 2px; }
+
+        .item-dots {
+            flex-grow: 1;
+            border-bottom: 1px dotted rgba(212, 175, 55, 0.45);
+            margin: 0 10px;
+            position: relative;
+            bottom: 5px;
+        }
+
+        .item-price {
+            font-family: 'Cinzel', serif; font-weight: 800; color: var(--gold);
+            font-size: 1.15rem; white-space: nowrap;
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Variantes de tamaño en una sola tarjeta */
+        .menu-item.variantes { align-items: center; }
+        .item-prices { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+        .price-row { display: flex; align-items: baseline; gap: 10px; }
+        .price-row .size {
+            font-size: 0.85rem; font-style: italic; color: #c4bba6;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* Layout para los Tragos: imagen | descripción | precio */
+        .drink-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            background: var(--card-bg);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-left: 3px solid transparent;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease, background 0.4s ease;
+        }
+
+        .drink-item:hover, .drink-item:active {
+            border-left-color: var(--gold);
+            transform: scale(1.02);
+            background: rgba(25, 35, 25, 0.92);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.5), 0 0 10px var(--gold-glow);
+        }
+
+        .drink-img {
+            flex: 0 0 auto;
+            width: 96px;
+            height: 120px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+        }
+
+        .drink-info { flex: 1; min-width: 0; }
+        .drink-info .item-desc { margin-top: 0; }
+        .drink-item .item-price { align-self: center; }
+
+        /* =========================================
+           4. APARICIÓN SUAVE AL HACER SCROLL
+           ========================================= */
+        .reveal {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* =========================================
+           5. CHISPAS AL TOCAR (SPARKLES)
+           ========================================= */
+        .sparkle {
+            position: fixed;
+            width: 6px; height: 6px;
+            background-color: var(--gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: 0 0 10px 2px var(--gold);
+            animation: explode 0.8s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+
+        /* =========================================
+           6. FOOTER
+           ========================================= */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 40px;
+            border-top: 1px solid #333;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: #888;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Botón de sonido */
+        .sound-toggle {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 60;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(212, 175, 55, 0.7);
+            background: rgba(5, 10, 5, 0.85);
+            color: var(--gold);
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
+            transition: background 0.3s ease, opacity 0.3s ease;
+        }
+        .sound-toggle.off { opacity: 0.55; }
+        .sound-toggle:hover { background: rgba(212, 175, 55, 0.18); }
+
+        /* Respeta a quien tiene animaciones reducidas en su celular */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .reveal { opacity: 1; transform: none; transition: none; }
+            .section-title, .logo-image-container, .seccion-visible, .nav-btn:not(.active-btn) { animation: none; }
+            #magic-bg, .sparkle { display: none; }
+        }
+
+        @media (max-width: 420px) {
+            .drink-img { width: 80px; height: 100px; }
+            .section-title { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CAPAS DE FONDO -->
+    <div class="parallax-bg"></div>
+    <div class="noise-overlay"></div>
+    <div class="gradient-overlay"></div>
+    <div id="magic-bg"></div>
+
+    <!-- CONTENIDO -->
+    <div class="menu-container">
+
+        <!-- LOGOTIPO -->
+        <header class="reveal">
+            <div class="logo-image-container">
+                <img src="logo.png" alt="The Lirium Craft Bar" class="logo-image">
+            </div>
+        </header>
+
+        <!-- NAVEGACIÓN FIJA -->
+        <nav class="top-nav" aria-label="Carta">
+            <div class="nav-buttons" role="tablist">
+                <button class="nav-btn active-btn" role="tab" aria-selected="true" onclick="mostrarSeccion('comidas', this)">Comidas</button>
+                <button class="nav-btn" role="tab" aria-selected="false" onclick="mostrarSeccion('bebidas', this)">Bebidas</button>
+            </div>
+            <div class="chips" id="chips-comidas">
+                <a class="chip" href="#papas">Papas</a>
+                <a class="chip" href="#hamburguesas">Hamburguesas</a>
+                <a class="chip" href="#empanadas">Empanadas</a>
+                <a class="chip" href="#pizzas">Pizzas</a>
+            </div>
+        </nav>
+
+        <!-- =========================================
+             SECCIÓN COMIDAS (VISIBLE POR DEFECTO)
+             ========================================= -->
+        <div id="seccion-comidas" class="seccion-visible">
+
+            <!-- PAPAS -->
+            <h2 class="section-title reveal" id="papas">Papas</h2>
+
+            <div class="menu-item variantes reveal">
+                <div><span class="item-name">Papas fritas</span></div>
+                <div class="item-dots"></div>
+                <div class="item-prices">
+                    <div class="price-row"><span class="size">Chica</span><span class="item-price">$15.500</span></div>
+                    <div class="price-row"><span class="size">XXL</span><span class="item-price">$20.500</span></div>
+                </div>
+            </div>
+
+            <div class="menu-item variantes reveal">
+                <div><span class="item-name">Papas con cheddar, panceta y verdeo</span></div>
+                <div class="item-dots"></div>
+                <div class="item-prices">
+                    <div class="price-row"><span class="size">Chica</span><span class="item-price">$18.000</span></div>
+                    <div class="price-row"><span class="size">XXL</span><span class="item-price">$23.000</span></div>
+                </div>
+            </div>
+
+            <!-- HAMBURGUESAS -->
+            <h2 class="section-title reveal" id="hamburguesas">Hamburguesas</h2>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Simple</span></div>
+                <div class="item-dots"></div><div class="item-price">$20.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Completa</span></div>
+                <div class="item-dots"></div><div class="item-price">$22.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Panceta, cheddar y cebolla caramelizada</span></div>
+                <div class="item-dots"></div><div class="item-price">$22.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Doble cheddar</span></div>
+                <div class="item-dots"></div><div class="item-price">$22.000</div>
+            </div>
+
+            <!-- EMPANADAS -->
+            <h2 class="section-title reveal" id="empanadas">Empanadas</h2>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Jamón y queso</span></div>
+                <div class="item-dots"></div><div class="item-price">$4.000 c/u</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Carne</span></div>
+                <div class="item-dots"></div><div class="item-price">$4.000 c/u</div>
+            </div>
+
+            <!-- PIZZAS -->
+            <h2 class="section-title reveal" id="pizzas">Pizzas</h2>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Muzzarella</span></div>
+                <div class="item-dots"></div><div class="item-price">$26.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Jamón y muzzarella</span></div>
+                <div class="item-dots"></div><div class="item-price">$27.500</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Especial con morrón</span></div>
+                <div class="item-dots"></div><div class="item-price">$27.500</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Cuatro quesos</span></div>
+                <div class="item-dots"></div><div class="item-price">$29.500</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Fugazzeta</span></div>
+                <div class="item-dots"></div><div class="item-price">$27.500</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Rúcula y jamón crudo</span></div>
+                <div class="item-dots"></div><div class="item-price">$30.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Napolitana</span><span class="item-desc">tomate y ajo</span></div>
+                <div class="item-dots"></div><div class="item-price">$27.500</div>
+            </div>
+        </div>
+
+        <!-- =========================================
+             SECCIÓN BEBIDAS (OCULTA POR DEFECTO)
+             ========================================= -->
+        <div id="seccion-bebidas" class="seccion-oculta">
+            <h2 class="section-title reveal">Tragos</h2>
+
+            <div class="drink-item reveal">
+                <img src="fernet.png" alt="Fernet" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Fernet, Coca-Cola y hielo.</span>
+                </div>
+                <span class="item-price">$12.000</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="gin.png" alt="Gin Tonic" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Gin, agua tónica, hielo y fruta. <br><em>Podés elegirlo de naranja, limón, pomelo o frutos rojos.</em></span>
+                </div>
+                <span class="item-price">$12.000</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="malibu.png" alt="Malibú" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Malibú, jugo de naranja y hielo.</span>
+                </div>
+                <span class="item-price">$12.000</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="campari.png" alt="Campari" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Campari, jugo de naranja y hielo.</span>
+                </div>
+                <span class="item-price">$12.000</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="cynar.png" alt="Cynar" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Cynar, gaseosa de pomelo, hielo y pomelo o limón.</span>
+                </div>
+                <span class="item-price">$12.000</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="gancia.png" alt="Gancia" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Gancia, Sprite, limón y hielo.</span>
+                </div>
+                <span class="item-price">$10.000</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="mojito.png" alt="Mojito" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Ron blanco, lima o limón, menta, azúcar, soda y hielo.</span>
+                </div>
+                <span class="item-price">$14.000</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="cuba.png" alt="Cuba Libre" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Ron, Coca-Cola, lima o limón y hielo.</span>
+                </div>
+                <span class="item-price">$12.000</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="aperol.png" alt="Aperol Spritz" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Aperol, espumante, soda, naranja y hielo.</span>
+                </div>
+                <span class="item-price">$15.000</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="negroni.png" alt="Negroni" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Gin, Campari, vermouth rosso, naranja y hielo.</span>
+                </div>
+                <span class="item-price">$14.500</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="vermouth.png" alt="Vermouth La Fuerza" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">La Fuerza Rojo, soda, hielo y naranja.</span>
+                </div>
+                <span class="item-price">$10.500</span>
+            </div>
+
+            <div class="drink-item reveal">
+                <img src="caipirinha.png" alt="Caipirinha" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <div class="drink-info">
+                    <span class="item-desc">Cachaça, lima o limón, azúcar y hielo.</span>
+                </div>
+                <span class="item-price">$14.000</span>
+            </div>
+
+            <!-- BEBIDAS (sin alcohol, etc.) - agregar acá los items -->
+            <h2 class="section-title reveal" id="bebidas-final">Bebidas</h2>
+        </div>
+
+        <footer class="reveal">
+            <p>The Lirium Craft Bar</p>
+        </footer>
+    </div>
+
+    <button class="sound-toggle" id="sound-toggle" type="button" aria-label="Activar o silenciar sonido" title="Sonido">🔊</button>
+
+    <script>
+        const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // =========================================
+        // 1. APARICIÓN AL HACER SCROLL (un solo observer)
+        // =========================================
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: "0px 0px -5% 0px" });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // =========================================
+        // 2. CAMBIAR ENTRE PESTAÑAS
+        // =========================================
+        function mostrarSeccion(seccion, boton) {
+            document.getElementById('seccion-comidas').className = 'seccion-oculta';
+            document.getElementById('seccion-bebidas').className = 'seccion-oculta';
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active-btn');
+                btn.setAttribute('aria-selected', 'false');
+            });
+
+            document.getElementById('seccion-' + seccion).className = 'seccion-visible';
+            boton.classList.add('active-btn');
+            boton.setAttribute('aria-selected', 'true');
+
+            // Las categorías rápidas solo tienen sentido en comidas
+            document.getElementById('chips-comidas').classList.toggle('oculto', seccion !== 'comidas');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =========================================
+        // 3. PARTÍCULAS (menos cantidad = más fluido)
+        // =========================================
+        if (!reducirMovimiento) {
+            const bg = document.getElementById('magic-bg');
+            const particleCount = window.innerWidth < 768 ? 12 : 28;
+
+            for (let i = 0; i < particleCount; i++) {
+                let particle = document.createElement('div');
+                particle.classList.add('particle');
+                let size = Math.random() * 3 + 1.5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.animationDuration = `${Math.random() * 15 + 10}s, ${Math.random() * 2 + 1}s`;
+                particle.style.animationDelay = `${Math.random() * 10}s, 0s`;
+                bg.appendChild(particle);
+            }
+        }
+
+        // =========================================
+        // 4. CHISPAS AL TOCAR (un solo evento, sin duplicados)
+        // =========================================
+        function createSparkles(x, y) {
+            for (let i = 0; i < 6; i++) {
+                let spark = document.createElement('div');
+                spark.classList.add('sparkle');
+                spark.style.left = `${x}px`;
+                spark.style.top = `${y}px`;
+
+                let angle = Math.random() * Math.PI * 2;
+                let velocity = Math.random() * 50 + 20;
+                spark.style.setProperty('--tx', `${Math.cos(angle) * velocity}px`);
+                spark.style.setProperty('--ty', `${Math.sin(angle) * velocity}px`);
+
+                document.body.appendChild(spark);
+                setTimeout(() => { spark.remove(); }, 800);
+            }
+        }
+
+        if (!reducirMovimiento) {
+            document.body.addEventListener('pointerdown', function(e) {
+                createSparkles(e.clientX, e.clientY);
+            });
+        }
+
+        // =========================================
+        // 5. SONIDO AL TOCAR Y MANTENER
+        // Arpegio descendente y staccato desde el agudo, con reverb larga.
+        // Triada mayor con novena o con cuarta aumentada (#11), raíz distinta en cada toque.
+        // Mientras el dedo sigue apretado el arpegio se repite y el timbre se va modulando de a poco.
+        // =========================================
+        let audioCtx = null, notaBus = null, tonoFiltro = null, wetGain = null, dryGain = null;
+        let sonidoActivo = true, ultimaRaiz = -1, sesion = null, pulsado = false;
+        const DURACION_MINIMA = 0.5; // un toque corto igual completa el arpegio
+        const botonSonido = document.getElementById('sound-toggle');
+
+        function crearReverb(ctx) {
+            const dur = 4.5, rate = ctx.sampleRate, len = Math.floor(rate * dur);
+            const buf = ctx.createBuffer(2, len, rate);
+            for (let c = 0; c < 2; c++) {
+                const d = buf.getChannelData(c);
+                for (let i = 0; i < len; i++) {
+                    d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+                }
+            }
+            const conv = ctx.createConvolver();
+            conv.buffer = buf;
+            return conv;
+        }
+
+        function iniciarAudio() {
+            if (audioCtx) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                return;
+            }
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            audioCtx = new AC();
+
+            const comp = audioCtx.createDynamicsCompressor();
+            comp.threshold.value = -24;
+            comp.ratio.value = 4;
+
+            const master = audioCtx.createGain();
+            master.gain.value = 1.1;
+
+            dryGain = audioCtx.createGain();
+            dryGain.gain.value = 0.45;
+            wetGain = audioCtx.createGain();
+            wetGain.gain.value = 0.9;
+
+            tonoFiltro = audioCtx.createBiquadFilter();
+            tonoFiltro.type = 'lowpass';
+            tonoFiltro.frequency.value = 1000;
+
+            const rev = crearReverb(audioCtx);
+            const revTono = audioCtx.createBiquadFilter();
+            revTono.type = 'lowpass';
+            revTono.frequency.value = 1500;
+
+            notaBus = audioCtx.createGain();
+            notaBus.connect(tonoFiltro);
+            tonoFiltro.connect(dryGain);
+            tonoFiltro.connect(rev);
+            rev.connect(revTono);
+            revTono.connect(wetGain);
+            dryGain.connect(comp);
+            wetGain.connect(comp);
+            comp.connect(master);
+            master.connect(audioCtx.destination);
+        }
+
+        // Una nota corta de cuerdas: dos sierras apenas desafinadas, con filtro que se cierra
+        function tocarNota(freq, t0, vel, dur, det, destino, vib) {
+            const ctx = audioCtx;
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(0.0001, t0);
+            g.gain.exponentialRampToValueAtTime(vel, t0 + 0.012);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+            const f = ctx.createBiquadFilter();
+            f.type = 'lowpass';
+            f.frequency.setValueAtTime(Math.min(freq * 2, 2200), t0);
+            f.frequency.exponentialRampToValueAtTime(Math.max(freq * 0.9, 300), t0 + dur);
+
+            // Una sierra suave (cuerda) + una triangular (cuerpo redondo y opaco)
+            [['sawtooth', -det, 0.35], ['triangle', det, 1]].forEach(([tipo, d, nivel]) => {
+                const o = ctx.createOscillator();
+                o.type = tipo;
+                o.frequency.value = freq;
+                o.detune.value = d;
+                if (vib) vib.connect(o.detune);
+                const og = ctx.createGain();
+                og.gain.value = nivel;
+                o.connect(og);
+                og.connect(f);
+                o.start(t0);
+                o.stop(t0 + dur + 0.05);
+            });
+
+            f.connect(g);
+            g.connect(destino);
+        }
+
+        // Triada mayor + novena (2) o cuarta aumentada (6), con raíz distinta a la anterior
+        function nuevaTriada() {
+            let raiz;
+            do { raiz = Math.floor(Math.random() * 12); } while (raiz === ultimaRaiz);
+            ultimaRaiz = raiz;
+            const ext = Math.random() < 0.5 ? 2 : 6;
+            return [0, 4, 7, ext].map(x => (raiz + x) % 12);
+        }
+
+        // Notas de la triada de arriba hacia abajo; al modular, el arpegio baja cada vez más
+        function notasDe(clases, piso) {
+            const notas = [];
+            for (let m = 96; m >= piso; m--) {
+                if (clases.includes(m % 12)) notas.push(m);
+            }
+            return notas;
+        }
+
+        function planificar() {
+            const s = sesion;
+            if (!s) return;
+            const ctx = s.ctx;
+            const ahora = ctx.currentTime;
+            const h = ahora - s.inicio;
+            const p = 1 - Math.exp(-h / 6); // 0 al empezar, tiende a 1 de forma gradual
+
+            // Modulación gradual del timbre
+            tonoFiltro.frequency.setTargetAtTime(1000 + 700 * p + 250 * Math.sin(h * 0.9), ahora, 0.08);
+            wetGain.gain.setTargetAtTime(0.9 + 0.5 * p, ahora, 0.4);
+            dryGain.gain.setTargetAtTime(0.45 - 0.15 * p, ahora, 0.4);
+            s.vib.gain.setTargetAtTime(30 * p, ahora, 0.3);
+
+            while (s.proximo < ahora + 0.12) {
+                if (s.idx >= s.notas.length) {
+                    s.notas = notasDe(s.clases, Math.round(79 - 19 * p));
+                    s.idx = 0;
+                    s.proximo += 0.05 + 0.25 * p; // pausa entre repeticiones, cada vez más amplia
+                }
+                const m = s.notas[s.idx];
+                const freq = 440 * Math.pow(2, (m - 69) / 12);
+                const vel = Math.max(0.035, 0.065 * (1 - s.idx * 0.05)) * (1 - 0.25 * p);
+                const dur = 0.16 + 0.45 * p;      // de staccato a notas más largas
+                const det = 6 + 18 * p;           // el ensamble se va abriendo
+                tocarNota(freq, s.proximo + Math.random() * 0.008, vel, dur, det, s.hold, s.vib);
+                s.idx++;
+                s.proximo += 0.065 + 0.05 * p;
+            }
+        }
+
+        function empezarSostenido() {
+            if (!audioCtx || !sonidoActivo || audioCtx.state !== 'running') return;
+            if (sesion) { clearTimeout(sesion.finTimer); terminarSostenido(); }
+
+            const ctx = audioCtx;
+            const t0 = ctx.currentTime;
+
+            const hold = ctx.createGain();
+            hold.gain.setValueAtTime(0.0001, t0);
+            hold.gain.exponentialRampToValueAtTime(1, t0 + 0.02);
+            hold.connect(notaBus);
+
+            const lfo = ctx.createOscillator();
+            lfo.type = 'sine';
+            lfo.frequency.value = 4.8;
+            const vib = ctx.createGain();
+            vib.gain.value = 0;
+            lfo.connect(vib);
+            lfo.start(t0);
+
+            sesion = {
+                ctx, hold, lfo, vib,
+                clases: nuevaTriada(),
+                notas: [], idx: 0,
+                inicio: t0, proximo: t0 + 0.02,
+                timer: null, finTimer: null
+            };
+            planificar();
+            sesion.timer = setInterval(planificar, 25);
+        }
+
+        function terminarSostenido() {
+            const s = sesion;
+            if (!s) return;
+            sesion = null;
+            clearInterval(s.timer);
+            const t = s.ctx.currentTime;
+            s.hold.gain.cancelScheduledValues(t);
+            s.hold.gain.setValueAtTime(Math.max(s.hold.gain.value, 0.0001), t);
+            s.hold.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+            try { s.lfo.stop(t + 0.3); } catch (e) {}
+            setTimeout(() => { try { s.hold.disconnect(); } catch (e) {} }, 1500);
+            // la cola de reverb sigue sonando sola
+        }
+
+        function soltarSostenido() {
+            const s = sesion;
+            if (!s) return;
+            const restante = DURACION_MINIMA - (s.ctx.currentTime - s.inicio);
+            if (restante > 0) {
+                s.finTimer = setTimeout(() => { if (sesion === s) terminarSostenido(); }, restante * 1000);
+            } else {
+                terminarSostenido();
+            }
+        }
+
+        function alPulsar(e) {
+            if (e.target.closest && e.target.closest('#sound-toggle')) return;
+            pulsado = true;
+            iniciarAudio();
+            if (audioCtx && audioCtx.state === 'running') {
+                empezarSostenido();
+            } else if (audioCtx) {
+                audioCtx.resume().then(() => { if (pulsado && !sesion) empezarSostenido(); }).catch(() => {});
+            }
+        }
+
+        function alSoltar() {
+            if (!pulsado) return;
+            pulsado = false;
+            if (!audioCtx) return;
+            // En el primer toque el navegador recién habilita el audio al soltar: suena un acorde corto
+            audioCtx.resume().then(() => {
+                if (!sesion) empezarSostenido();
+                soltarSostenido();
+            }).catch(() => {});
+        }
+
+        window.addEventListener('pointerdown', alPulsar, { passive: true });
+        window.addEventListener('pointerup', alSoltar, { passive: true });
+        window.addEventListener('pointercancel', alSoltar, { passive: true });
+        window.addEventListener('blur', alSoltar);
+        document.addEventListener('visibilitychange', () => { if (document.hidden) alSoltar(); });
+
+        // Algunos navegadores (iPhone) solo habilitan el audio con estos eventos
+        ['touchend', 'click', 'keydown'].forEach(ev => {
+            window.addEventListener(ev, iniciarAudio, { passive: true });
+        });
+
+        botonSonido.addEventListener('click', function() {
+            iniciarAudio();
+            sonidoActivo = !sonidoActivo;
+            botonSonido.textContent = sonidoActivo ? '🔊' : '🔇';
+            botonSonido.classList.toggle('off', !sonidoActivo);
+            if (!sonidoActivo) { pulsado = false; terminarSostenido(); }
+        });
+    </script>
+</body>
+</html>
