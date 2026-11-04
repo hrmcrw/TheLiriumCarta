@@ -215,29 +215,35 @@
         }
         .nav-btn:not(.active-btn) { animation: latido 2.6s ease-in-out infinite; }
 
-        /* Categorías: se acomodan en filas y nunca obligan a deslizar */
+        /* Categorías: grilla pareja, 3 columnas, todos del mismo tamaño */
         .chips {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 6px;
             margin-top: 10px;
         }
         .chips.oculto { display: none; }
+        /* el séptimo queda centrado en la última fila */
+        .chips .chip:last-child:nth-child(3n + 1) { grid-column: 2; }
 
         .chip {
-            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+            padding: 0 4px;
             text-align: center;
+            line-height: 1.1;
             font-family: 'Cinzel', serif;
-            font-size: 0.7rem;
+            font-size: min(0.7rem, 2.7vw);
             font-weight: 600;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.3px;
             text-transform: uppercase;
             color: var(--gold-light);
             text-decoration: none;
-            padding: 6px 10px;
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            border-radius: 999px;
-            background: rgba(212, 175, 55, 0.07);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 8px;
+            background: rgba(212, 175, 55, 0.08);
             transition: background 0.3s ease, color 0.3s ease;
         }
         .chip:hover, .chip:active { background: var(--gold); color: #000; }
@@ -321,8 +327,31 @@
             margin: -2px 0 8px;
             font-size: 1rem;
         }
-        .footer-info { margin-top: 14px; font-size: 0.8rem; letter-spacing: 1.5px; color: #aaa; }
-        .footer-info a { color: var(--gold); text-decoration: none; }
+        .footer-seguinos {
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+        .insta-btn {
+            display: inline-block;
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #000;
+            background: var(--gold-gradient);
+            padding: 12px 22px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 14px rgba(212, 175, 55, 0.35);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .insta-btn:hover, .insta-btn:active {
+            transform: scale(1.04);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.6), 0 0 20px rgba(212, 175, 55, 0.8);
+        }
 
         /* Variantes de tamaño en una sola tarjeta */
         .menu-item.variantes { align-items: center; }
@@ -782,8 +811,8 @@
         </div>
 
         <footer class="reveal">
-            <p>The Lirium Craft Bar</p>
-            <p class="footer-info">Wi-Fi: THE LIRIUM<br>Seguinos en Instagram <a href="https://instagram.com/theliriumcraftbar" target="_blank" rel="noopener">@theliriumcraftbar</a></p>
+            <p class="footer-seguinos">Seguinos en</p>
+            <a class="insta-btn" href="https://www.instagram.com/theliriumcraftbar/" target="_blank" rel="noopener">@THELIRIUMCRAFTBAR</a>
         </footer>
     </div>
 
