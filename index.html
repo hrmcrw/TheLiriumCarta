@@ -320,6 +320,26 @@
 
         .menu-item > div:first-child { min-width: 0; }
         .menu-item .item-price { align-self: flex-end; }
+
+        /* Foto opcional: aparece solo si existe un archivo con el nombre del plato */
+        .menu-item.con-foto { align-items: center; gap: 14px; }
+        .menu-item.con-foto > div:not(.item-price) { flex: 1; min-width: 0; }
+        .menu-item.con-foto .item-price { align-self: center; }
+        .item-foto {
+            flex: 0 0 auto;
+            width: 78px;
+            height: 78px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+        @media (max-width: 420px) { .item-foto { width: 66px; height: 66px; } }
+
+        /* Subbotones de Bebidas (mismo estilo que las categorías) */
+        .chips.chips-2 { grid-template-columns: repeat(2, 1fr); }
+        button.chip { cursor: pointer; font-family: 'Cinzel', serif; }
+        .chip.activo { background: var(--gold-gradient); color: #000; border-color: #fff; }
         .nota {
             text-align: center;
             font-style: italic;
@@ -509,6 +529,10 @@
                 <a class="chip" href="#veganas">Opciones veganas</a>
                 <a class="chip" href="#postres">Postres</a>
             </div>
+            <div class="chips chips-2 oculto" id="chips-bebidas">
+                <a class="chip" href="#con-alcohol">Con alcohol</a>
+                <a class="chip" href="#sin-alcohol">Sin alcohol</a>
+            </div>
         </nav>
         </div>
 
@@ -694,12 +718,12 @@
              SECCIÓN BEBIDAS (OCULTA POR DEFECTO)
              ========================================= -->
         <div id="seccion-bebidas" class="seccion-oculta">
-            <h2 class="section-title reveal">Tragos</h2>
+            <h2 class="section-title reveal" id="con-alcohol">Con alcohol</h2>
 
             <div class="drink-item reveal">
                 <img src="fernet.png" alt="Fernet" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Fernet, Coca-Cola y hielo.</span>
+                    <span class="item-name">Fernet</span><span class="item-desc">Fernet, Coca-Cola y hielo.</span>
                 </div>
                 <span class="item-price">$12.000</span>
             </div>
@@ -707,7 +731,7 @@
             <div class="drink-item reveal">
                 <img src="gin.png" alt="Gin Tonic" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Gin, agua tónica, hielo y fruta. <br><em>Podés elegirlo de naranja, limón, pomelo o frutos rojos.</em></span>
+                    <span class="item-name">Gin Tonic</span><span class="item-desc">Gin, agua tónica, hielo y fruta. <br><em>Podés elegirlo de naranja, limón, pomelo o frutos rojos.</em></span>
                 </div>
                 <span class="item-price">$12.000</span>
             </div>
@@ -715,7 +739,7 @@
             <div class="drink-item reveal">
                 <img src="malibu.png" alt="Malibú" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Malibú, jugo de naranja y hielo.</span>
+                    <span class="item-name">Malibú</span><span class="item-desc">Malibú, jugo de naranja y hielo.</span>
                 </div>
                 <span class="item-price">$12.000</span>
             </div>
@@ -723,7 +747,7 @@
             <div class="drink-item reveal">
                 <img src="campari.png" alt="Campari" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Campari, jugo de naranja y hielo.</span>
+                    <span class="item-name">Campari</span><span class="item-desc">Campari, jugo de naranja y hielo.</span>
                 </div>
                 <span class="item-price">$12.000</span>
             </div>
@@ -731,7 +755,7 @@
             <div class="drink-item reveal">
                 <img src="cynar.png" alt="Cynar" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Cynar, gaseosa de pomelo, hielo y pomelo o limón.</span>
+                    <span class="item-name">Cynar</span><span class="item-desc">Cynar, gaseosa de pomelo, hielo y pomelo o limón.</span>
                 </div>
                 <span class="item-price">$12.000</span>
             </div>
@@ -739,7 +763,7 @@
             <div class="drink-item reveal">
                 <img src="gancia.png" alt="Gancia" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Gancia, Sprite, limón y hielo.</span>
+                    <span class="item-name">Gancia</span><span class="item-desc">Gancia, Sprite, limón y hielo.</span>
                 </div>
                 <span class="item-price">$10.000</span>
             </div>
@@ -747,7 +771,7 @@
             <div class="drink-item reveal">
                 <img src="mojito.png" alt="Mojito" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Ron blanco, lima o limón, menta, azúcar, soda y hielo.</span>
+                    <span class="item-name">Mojito</span><span class="item-desc">Ron blanco, lima o limón, menta, azúcar, soda y hielo.</span>
                 </div>
                 <span class="item-price">$14.000</span>
             </div>
@@ -755,7 +779,7 @@
             <div class="drink-item reveal">
                 <img src="cuba.png" alt="Cuba Libre" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Ron, Coca-Cola, lima o limón y hielo.</span>
+                    <span class="item-name">Cuba Libre</span><span class="item-desc">Ron, Coca-Cola, lima o limón y hielo.</span>
                 </div>
                 <span class="item-price">$12.000</span>
             </div>
@@ -763,7 +787,7 @@
             <div class="drink-item reveal">
                 <img src="aperol.png" alt="Aperol Spritz" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Aperol, espumante, soda, naranja y hielo.</span>
+                    <span class="item-name">Aperol Spritz</span><span class="item-desc">Aperol, espumante, soda, naranja y hielo.</span>
                 </div>
                 <span class="item-price">$15.000</span>
             </div>
@@ -771,7 +795,7 @@
             <div class="drink-item reveal">
                 <img src="negroni.png" alt="Negroni" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Gin, Campari, vermouth rosso, naranja y hielo.</span>
+                    <span class="item-name">Negroni</span><span class="item-desc">Gin, Campari, vermouth rosso, naranja y hielo.</span>
                 </div>
                 <span class="item-price">$14.500</span>
             </div>
@@ -779,7 +803,7 @@
             <div class="drink-item reveal">
                 <img src="vermouth.png" alt="Vermouth La Fuerza" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">La Fuerza Rojo, soda, hielo y naranja.</span>
+                    <span class="item-name">Vermouth La Fuerza</span><span class="item-desc">La Fuerza Rojo, soda, hielo y naranja.</span>
                 </div>
                 <span class="item-price">$10.500</span>
             </div>
@@ -787,12 +811,12 @@
             <div class="drink-item reveal">
                 <img src="caipirinha.png" alt="Caipirinha" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
-                    <span class="item-desc">Cachaça, lima o limón, azúcar y hielo.</span>
+                    <span class="item-name">Caipirinha</span><span class="item-desc">Cachaça, lima o limón, azúcar y hielo.</span>
                 </div>
                 <span class="item-price">$14.000</span>
             </div>
 
-            <h2 class="section-title reveal" id="bebidas-final">Bebidas</h2>
+            <h2 class="section-title reveal" id="sin-alcohol">Sin alcohol</h2>
 
             <div class="menu-item reveal">
                 <div><span class="item-name">Agua con y sin gas</span><span class="item-desc">500 ml</span></div>
@@ -861,9 +885,53 @@
 
             // Las categorías rápidas solo tienen sentido en comidas
             document.getElementById('chips-comidas').classList.toggle('oculto', seccion !== 'comidas');
+            // Y los de alcohol / sin alcohol solo en bebidas
+            document.getElementById('chips-bebidas').classList.toggle('oculto', seccion !== 'bebidas');
 
+            medirBarraFija();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // =========================================
+        // FOTOS POR NOMBRE
+        // Cada tarjeta busca una imagen cuyo nombre es el del plato/bebida:
+        // "Papas cheddar & panceta" -> papas-cheddar-y-panceta.png
+        // Si el archivo no existe, la tarjeta queda igual que antes.
+        // =========================================
+        const EXTENSIONES_FOTO = ['png', 'jpg', 'jpeg', 'webp'];
+
+        function nombreDeArchivo(texto) {
+            return texto
+                .toLowerCase()
+                .replace(/&/g, ' y ')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
+        function ponerFoto(tarjeta, base, nombre, i) {
+            if (i >= EXTENSIONES_FOTO.length) return;
+            const probe = new Image();
+            probe.onload = function() {
+                const img = document.createElement('img');
+                img.src = probe.src;
+                img.alt = nombre;
+                img.className = 'item-foto';
+                img.loading = 'lazy';
+                img.decoding = 'async';
+                tarjeta.classList.add('con-foto');
+                tarjeta.insertBefore(img, tarjeta.firstChild);
+            };
+            probe.onerror = function() { ponerFoto(tarjeta, base, nombre, i + 1); };
+            probe.src = base + '.' + EXTENSIONES_FOTO[i];
+        }
+
+        document.querySelectorAll('.menu-item').forEach(function(tarjeta) {
+            const el = tarjeta.querySelector('.item-name');
+            if (!el) return;
+            const nombre = el.textContent.trim();
+            ponerFoto(tarjeta, nombreDeArchivo(nombre), nombre, 0);
+        });
 
         // =========================================
         // 3. PARTÍCULAS (menos cantidad = más fluido)
