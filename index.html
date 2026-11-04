@@ -126,19 +126,27 @@
             100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.2)); }
         }
 
+        /* Logo + pestañas: quedan fijos arriba al hacer scroll */
+        .top-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            margin: -20px -20px 10px;
+            background: rgba(5, 10, 5, 0.92);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border-bottom: 2px solid var(--gold);
+            box-shadow: 0 8px 24px -10px var(--gold-glow);
+        }
+
         header {
             text-align: center;
-            padding: 30px 20px;
-            border-bottom: 2px solid var(--gold);
-            margin-bottom: 16px;
-            box-shadow: 0 10px 30px -10px var(--gold-glow);
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
+            padding: 12px 20px 4px;
         }
 
         .logo-image-container {
             width: 100%;
-            max-width: 350px;
+            max-width: 190px;
             margin: 0 auto;
             display: flex;
             justify-content: center;
@@ -157,15 +165,7 @@
            NAVEGACIÓN FIJA (PESTAÑAS + CATEGORÍAS)
            ========================================= */
         .top-nav {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            margin: 0 -20px 10px;
-            padding: 12px 20px 10px;
-            background: rgba(5, 10, 5, 0.88);
-            -webkit-backdrop-filter: blur(8px);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+            padding: 6px 20px 10px;
         }
 
         .nav-buttons {
@@ -215,26 +215,26 @@
         }
         .nav-btn:not(.active-btn) { animation: latido 2.6s ease-in-out infinite; }
 
-        /* Las 4 categorías siempre caben en una fila, sin deslizar */
+        /* Categorías: se acomodan en filas y nunca obligan a deslizar */
         .chips {
             display: flex;
-            gap: 5px;
+            flex-wrap: wrap;
+            gap: 6px;
             margin-top: 10px;
         }
         .chips.oculto { display: none; }
 
         .chip {
             flex: 1 1 auto;
-            min-width: 0;
             text-align: center;
             font-family: 'Cinzel', serif;
-            font-size: min(0.72rem, 2.6vw);
+            font-size: 0.7rem;
             font-weight: 600;
             letter-spacing: 0.4px;
             text-transform: uppercase;
             color: var(--gold-light);
             text-decoration: none;
-            padding: 6px 6px;
+            padding: 6px 10px;
             border: 1px solid rgba(212, 175, 55, 0.4);
             border-radius: 999px;
             background: rgba(212, 175, 55, 0.07);
@@ -275,7 +275,7 @@
             letter-spacing: 3px;
             position: relative;
             z-index: 2;
-            scroll-margin-top: 130px;
+            scroll-margin-top: var(--top-h, 230px);
         }
 
         .section-title::after {
@@ -305,19 +305,24 @@
         .item-name { font-weight: 600; font-size: 1.15rem; padding-right: 10px; display: block; text-shadow: 1px 1px 2px #000; }
         .item-desc { font-size: 1rem; color: #c4bba6; font-style: italic; display: block; margin-top: 2px; }
 
-        .item-dots {
-            flex-grow: 1;
-            border-bottom: 1px dotted rgba(212, 175, 55, 0.45);
-            margin: 0 10px;
-            position: relative;
-            bottom: 5px;
-        }
 
         .item-price {
             font-family: 'Cinzel', serif; font-weight: 800; color: var(--gold);
             font-size: 1.15rem; white-space: nowrap;
             text-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
         }
+
+        .menu-item > div:first-child { min-width: 0; }
+        .menu-item .item-price { align-self: flex-end; }
+        .nota {
+            text-align: center;
+            font-style: italic;
+            color: var(--gold);
+            margin: -2px 0 8px;
+            font-size: 1rem;
+        }
+        .footer-info { margin-top: 14px; font-size: 0.8rem; letter-spacing: 1.5px; color: #aaa; }
+        .footer-info a { color: var(--gold); text-decoration: none; }
 
         /* Variantes de tamaño en una sola tarjeta */
         .menu-item.variantes { align-items: center; }
@@ -452,8 +457,9 @@
     <!-- CONTENIDO -->
     <div class="menu-container">
 
+        <div class="top-fixed" id="top-fixed">
         <!-- LOGOTIPO -->
-        <header class="reveal">
+        <header>
             <div class="logo-image-container">
                 <img src="logo.png" alt="The Lirium Craft Bar" class="logo-image">
             </div>
@@ -466,112 +472,193 @@
                 <button class="nav-btn" role="tab" aria-selected="false" onclick="mostrarSeccion('bebidas', this)">Bebidas</button>
             </div>
             <div class="chips" id="chips-comidas">
-                <a class="chip" href="#papas">Papas</a>
+                <a class="chip" href="#para-picar">Para picar</a>
                 <a class="chip" href="#hamburguesas">Hamburguesas</a>
                 <a class="chip" href="#empanadas">Empanadas</a>
                 <a class="chip" href="#pizzas">Pizzas</a>
+                <a class="chip" href="#ensaladas">Ensaladas</a>
+                <a class="chip" href="#veganas">Opciones veganas</a>
+                <a class="chip" href="#postres">Postres</a>
             </div>
         </nav>
+        </div>
 
         <!-- =========================================
              SECCIÓN COMIDAS (VISIBLE POR DEFECTO)
              ========================================= -->
         <div id="seccion-comidas" class="seccion-visible">
 
-            <!-- PAPAS -->
-            <h2 class="section-title reveal" id="papas">Papas</h2>
+            <!-- PARA PICAR -->
+            <h2 class="section-title reveal" id="para-picar">Para picar</h2>
 
-            <div class="menu-item variantes reveal">
-                <div><span class="item-name">Papas fritas</span></div>
-                <div class="item-dots"></div>
-                <div class="item-prices">
-                    <div class="price-row"><span class="size">Chica</span><span class="item-price">$15.500</span></div>
-                    <div class="price-row"><span class="size">XXL</span><span class="item-price">$20.500</span></div>
-                </div>
+            <div class="menu-item reveal">
+                <div><span class="item-name">Papas fritas</span><span class="item-desc">Papas crocantes.</span></div>
+                <div class="item-price">$7.000</div>
             </div>
 
-            <div class="menu-item variantes reveal">
-                <div><span class="item-name">Papas con cheddar, panceta y verdeo</span></div>
-                <div class="item-dots"></div>
-                <div class="item-prices">
-                    <div class="price-row"><span class="size">Chica</span><span class="item-price">$18.000</span></div>
-                    <div class="price-row"><span class="size">XXL</span><span class="item-price">$23.000</span></div>
-                </div>
+            <div class="menu-item reveal">
+                <div><span class="item-name">Papas cheddar &amp; panceta</span><span class="item-desc">Papas, cheddar cremoso y panceta crocante.</span></div>
+                <div class="item-price">$9.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Rabas</span><span class="item-desc">Aros de calamar crocantes, limón y alioli cítrico.</span></div>
+                <div class="item-price">$12.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Tequeños</span><span class="item-desc">Bastones de queso crocantes con dip.</span></div>
+                <div class="item-price">$10.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Croquetas de brócoli y queso</span><span class="item-desc">Croquetas doradas con dip cítrico de hierbas.</span></div>
+                <div class="item-price">$9.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Croquetas de carne &amp; stout</span><span class="item-desc">Carne braseada a la cerveza negra, empanada y crocante.</span></div>
+                <div class="item-price">$10.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Tapeo cervecero europeo</span><span class="item-desc">Selección de quesos, salchicha artesanal, papas rústicas, aceitunas, pepinillos y mostaza.</span></div>
+                <div class="item-price">$18.000</div>
             </div>
 
             <!-- HAMBURGUESAS -->
             <h2 class="section-title reveal" id="hamburguesas">Hamburguesas</h2>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Simple</span></div>
-                <div class="item-dots"></div><div class="item-price">$20.000</div>
+                <div><span class="item-name">Clásica</span><span class="item-desc">Carne, cheddar, lechuga, tomate y salsa de la casa.</span></div>
+                <div class="item-price">$12.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Completa</span></div>
-                <div class="item-dots"></div><div class="item-price">$22.000</div>
+                <div><span class="item-name">Bacon</span><span class="item-desc">Carne, doble cheddar, panceta crocante y cebolla caramelizada.</span></div>
+                <div class="item-price">$13.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Panceta, cheddar y cebolla caramelizada</span></div>
-                <div class="item-dots"></div><div class="item-price">$22.000</div>
+                <div><span class="item-name">Completa</span><span class="item-desc">Carne, jamón, queso, huevo, lechuga y tomate.</span></div>
+                <div class="item-price">$13.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Doble cheddar</span></div>
-                <div class="item-dots"></div><div class="item-price">$22.000</div>
+                <div><span class="item-name">The Lirium</span><span class="item-desc">Carne, provoleta, rúcula, cebolla caramelizada y mayo de cerveza negra.</span></div>
+                <div class="item-price">$14.000</div>
             </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Veggie</span><span class="item-desc">Medallón de legumbres, queso, rúcula, tomate y alioli.</span></div>
+                <div class="item-price">$12.000</div>
+            </div>
+
+            <p class="nota reveal">Todas nuestras hamburguesas acompañadas con papas.</p>
 
             <!-- EMPANADAS -->
             <h2 class="section-title reveal" id="empanadas">Empanadas</h2>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Jamón y queso</span></div>
-                <div class="item-dots"></div><div class="item-price">$4.000 c/u</div>
+                <div><span class="item-name">Carne</span><span class="item-desc">Carne braseada, cebolla y especias.</span></div>
+                <div class="item-price">$6.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Carne</span></div>
-                <div class="item-dots"></div><div class="item-price">$4.000 c/u</div>
+                <div><span class="item-name">Jamón y queso</span><span class="item-desc">Jamón, queso y un toque de orégano.</span></div>
+                <div class="item-price">$6.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Vegana</span><span class="item-desc">Relleno vegetal especiado.</span></div>
+                <div class="item-price">$6.000</div>
             </div>
 
             <!-- PIZZAS -->
             <h2 class="section-title reveal" id="pizzas">Pizzas</h2>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Muzzarella</span></div>
-                <div class="item-dots"></div><div class="item-price">$26.000</div>
+                <div><span class="item-name">Muzzarella</span><span class="item-desc">Muzzarella, salsa de tomate y orégano.</span></div>
+                <div class="item-price">$11.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Jamón y muzzarella</span></div>
-                <div class="item-dots"></div><div class="item-price">$27.500</div>
+                <div><span class="item-name">Especial</span><span class="item-desc">Muzzarella, jamón y morrón.</span></div>
+                <div class="item-price">$13.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Especial con morrón</span></div>
-                <div class="item-dots"></div><div class="item-price">$27.500</div>
+                <div><span class="item-name">Fugazzeta</span><span class="item-desc">Muzzarella, cebolla y orégano.</span></div>
+                <div class="item-price">$13.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Cuatro quesos</span></div>
-                <div class="item-dots"></div><div class="item-price">$29.500</div>
+                <div><span class="item-name">Napolitana</span><span class="item-desc">Muzzarella, tomate, ajo y orégano.</span></div>
+                <div class="item-price">$12.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Fugazzeta</span></div>
-                <div class="item-dots"></div><div class="item-price">$27.500</div>
+                <div><span class="item-name">Rúcula &amp; crudo</span><span class="item-desc">Muzzarella, rúcula fresca, jamón crudo, parmesano y aceitunas.</span></div>
+                <div class="item-price">$14.000</div>
+            </div>
+
+            <p class="nota reveal">“El buen sabor también es un viaje.”</p>
+
+            <!-- ENSALADAS -->
+            <h2 class="section-title reveal" id="ensaladas">Ensaladas</h2>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Ensalada 01</span><span class="item-desc">Verdes, rúcula, cherry, jamón crudo, parmesano, nueces tostadas y vinagreta de mostaza y miel.</span></div>
+                <div class="item-price">$11.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Rúcula y jamón crudo</span></div>
-                <div class="item-dots"></div><div class="item-price">$30.000</div>
+                <div><span class="item-name">Ensalada 02</span><span class="item-desc">Rúcula, roquefort, pera, aceitunas negras, nueces, oliva y un toque de miel.</span></div>
+                <div class="item-price">$11.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Napolitana</span><span class="item-desc">tomate y ajo</span></div>
-                <div class="item-dots"></div><div class="item-price">$27.500</div>
+                <div><span class="item-name">Ensalada 03</span><span class="item-desc">Pollo grillado, palta, verdes, cherry, zanahoria, semillas tostadas y aderezo cítrico.</span></div>
+                <div class="item-price">$12.000</div>
             </div>
+
+            <!-- OPCIONES VEGANAS -->
+            <h2 class="section-title reveal" id="veganas">Opciones veganas</h2>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Buñuelos verdes</span><span class="item-desc">Espinaca y acelga ligadas con harina de garbanzo, especias y hierbas. Fritos y crocantes.</span></div>
+                <div class="item-price">$8.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Empanadas veganas</span><span class="item-desc">Relleno vegetal especiado.</span></div>
+                <div class="item-price">$8.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Vegetales crocantes</span><span class="item-desc">Selección de vegetales rebozados acompañados con hummus.</span></div>
+                <div class="item-price">$8.000</div>
+            </div>
+
+            <!-- POSTRES -->
+            <h2 class="section-title reveal" id="postres">Postres</h2>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Helado</span><span class="item-desc">Dos bochas a elección.</span></div>
+                <div class="item-price">$5.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Brownie &amp; Helado</span><span class="item-desc">Brownie tibio acompañado con helado.</span></div>
+                <div class="item-price">$7.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Cheesecake</span><span class="item-desc">Porción de cheesecake de la casa.</span></div>
+                <div class="item-price">$7.000</div>
+            </div>
+
+            <p class="nota reveal">“Buena comida, mejores encuentros.”</p>
         </div>
 
         <!-- =========================================
@@ -676,12 +763,27 @@
                 <span class="item-price">$14.000</span>
             </div>
 
-            <!-- BEBIDAS (sin alcohol, etc.) - agregar acá los items -->
             <h2 class="section-title reveal" id="bebidas-final">Bebidas</h2>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Agua con y sin gas</span><span class="item-desc">500 ml</span></div>
+                <div class="item-price">$3.500</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Agua saborizada</span><span class="item-desc">500 ml</span></div>
+                <div class="item-price">$4.000</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Coca / Fanta / Sprite</span><span class="item-desc">500 ml</span></div>
+                <div class="item-price">$4.500</div>
+            </div>
         </div>
 
         <footer class="reveal">
             <p>The Lirium Craft Bar</p>
+            <p class="footer-info">Wi-Fi: THE LIRIUM<br>Seguinos en Instagram <a href="https://instagram.com/theliriumcraftbar" target="_blank" rel="noopener">@theliriumcraftbar</a></p>
         </footer>
     </div>
 
@@ -689,6 +791,14 @@
 
     <script>
         const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function medirBarraFija() {
+            const t = document.getElementById('top-fixed');
+            document.documentElement.style.setProperty('--top-h', (t.offsetHeight + 12) + 'px');
+        }
+        window.addEventListener('load', medirBarraFija);
+        window.addEventListener('resize', medirBarraFija);
+        medirBarraFija();
 
         // =========================================
         // 1. APARICIÓN AL HACER SCROLL (un solo observer)
