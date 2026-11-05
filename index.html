@@ -28,7 +28,12 @@
             font-size: 18px;
             overflow-x: hidden;
             position: relative;
+            /* Sin selección de texto (ni menú de mantener apretado en iPhone) */
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
+        img { -webkit-user-drag: none; user-drag: none; }
 
         /* =========================================
            1. FONDO (funciona también en iPhone)
@@ -323,18 +328,16 @@
 
         /* Foto opcional: aparece solo si existe un archivo con el nombre del plato */
         .menu-item.con-foto { align-items: center; gap: 14px; }
-        .menu-item.con-foto > div:not(.item-price) { flex: 1; min-width: 0; }
+        .menu-item.con-foto > div:first-of-type { flex: 1; min-width: 0; }
         .menu-item.con-foto .item-price { align-self: center; }
         .item-foto {
             flex: 0 0 auto;
-            width: 78px;
-            height: 78px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+            width: 96px;
+            height: 120px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
         }
-        @media (max-width: 420px) { .item-foto { width: 66px; height: 66px; } }
+        @media (max-width: 420px) { .item-foto { width: 80px; height: 100px; } }
 
         /* Subbotones de Bebidas (mismo estilo que las categorías) */
         .chips.chips-2 { grid-template-columns: repeat(2, 1fr); }
@@ -377,6 +380,7 @@
         .menu-item.variantes { align-items: center; }
         .item-prices { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
         .price-row { display: flex; align-items: baseline; gap: 10px; }
+        .price-row .item-price { align-self: auto; }
         .price-row .size {
             font-size: 0.85rem; font-style: italic; color: #c4bba6;
             text-transform: uppercase; letter-spacing: 1px;
@@ -481,6 +485,52 @@
         .sound-toggle.off { opacity: 0.55; }
         .sound-toggle:hover { background: rgba(212, 175, 55, 0.18); }
 
+        /* Zoom al tocar un plato o bebida */
+        .con-foto, .drink-item { cursor: pointer; }
+        #zoom {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 24px;
+            cursor: pointer;
+            text-align: center;
+        }
+        #zoom.abierto { display: flex; }
+        #zoom-fondo {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+        }
+        #zoom > :not(#zoom-fondo) { position: relative; will-change: transform, opacity; }
+        #zoom img {
+            width: min(86vw, 440px);
+            height: 52vh;
+            object-fit: contain;
+            filter: drop-shadow(0 0 24px rgba(212, 175, 55, 0.45)) drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+        }
+        #zoom .zoom-nombre, #zoom .zoom-desc, #zoom .zoom-precio { transform-origin: 0 0; }
+        #zoom .zoom-nombre {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            text-shadow: 0 0 12px var(--gold-glow);
+        }
+        #zoom .zoom-desc { font-size: 1.05rem; font-style: italic; color: #c4bba6; max-width: 420px; }
+        #zoom .zoom-precio .price-row { justify-content: center; gap: 12px; margin-top: 2px; }
+        #zoom .zoom-precio .item-price { font-size: 1.3rem; }
+        #zoom .zoom-precio .size { font-size: 0.95rem; }
+        #zoom .zoom-precio { font-family: 'Cinzel', serif; font-size: 1.3rem; font-weight: 800; color: var(--gold); }
+
         /* Respeta a quien tiene animaciones reducidas en su celular */
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
@@ -525,9 +575,6 @@
                 <a class="chip" href="#hamburguesas">Hamburguesas</a>
                 <a class="chip" href="#empanadas">Empanadas</a>
                 <a class="chip" href="#pizzas">Pizzas</a>
-                <a class="chip" href="#ensaladas">Ensaladas</a>
-                <a class="chip" href="#veganas">Opciones veganas</a>
-                <a class="chip" href="#postres">Postres</a>
             </div>
             <div class="chips chips-2 oculto" id="chips-bebidas">
                 <a class="chip" href="#con-alcohol">Con alcohol</a>
@@ -544,67 +591,43 @@
             <!-- PARA PICAR -->
             <h2 class="section-title reveal" id="para-picar">Para picar</h2>
 
-            <div class="menu-item reveal">
+            <div class="menu-item variantes reveal">
                 <div><span class="item-name">Papas fritas</span><span class="item-desc">Papas crocantes.</span></div>
-                <div class="item-price">$7.000</div>
+                <div class="item-prices">
+                    <div class="price-row"><span class="size">Porción chica</span><span class="item-price">$15.500</span></div>
+                    <div class="price-row"><span class="size">XXL</span><span class="item-price">$20.500</span></div>
+                </div>
             </div>
 
-            <div class="menu-item reveal">
-                <div><span class="item-name">Papas cheddar &amp; panceta</span><span class="item-desc">Papas, cheddar cremoso y panceta crocante.</span></div>
-                <div class="item-price">$9.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Rabas</span><span class="item-desc">Aros de calamar crocantes, limón y alioli cítrico.</span></div>
-                <div class="item-price">$12.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Tequeños</span><span class="item-desc">Bastones de queso crocantes con dip.</span></div>
-                <div class="item-price">$10.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Croquetas de brócoli y queso</span><span class="item-desc">Croquetas doradas con dip cítrico de hierbas.</span></div>
-                <div class="item-price">$9.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Croquetas de carne &amp; stout</span><span class="item-desc">Carne braseada a la cerveza negra, empanada y crocante.</span></div>
-                <div class="item-price">$10.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Tapeo cervecero europeo</span><span class="item-desc">Selección de quesos, salchicha artesanal, papas rústicas, aceitunas, pepinillos y mostaza.</span></div>
-                <div class="item-price">$18.000</div>
+            <div class="menu-item variantes reveal" data-foto="papas-cheddar-y-panceta">
+                <div><span class="item-name">Papas cheddar, panceta &amp; verdeo</span><span class="item-desc">Papas, cheddar cremoso, panceta crocante y verdeo.</span></div>
+                <div class="item-prices">
+                    <div class="price-row"><span class="size">Porción chica</span><span class="item-price">$18.000</span></div>
+                    <div class="price-row"><span class="size">XXL</span><span class="item-price">$23.000</span></div>
+                </div>
             </div>
 
             <!-- HAMBURGUESAS -->
             <h2 class="section-title reveal" id="hamburguesas">Hamburguesas</h2>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Clásica</span><span class="item-desc">Carne, cheddar, lechuga, tomate y salsa de la casa.</span></div>
-                <div class="item-price">$12.000</div>
+                <div><span class="item-name">Simple</span><span class="item-desc">Un medallón de carne, tomate, lechuga y cheddar.</span></div>
+                <div class="item-price">$20.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Bacon</span><span class="item-desc">Carne, doble cheddar, panceta crocante y cebolla caramelizada.</span></div>
-                <div class="item-price">$13.000</div>
+                <div><span class="item-name">Completa</span><span class="item-desc">Un medallón de carne, jamón, panceta, queso, huevo, lechuga y tomate.</span></div>
+                <div class="item-price">$22.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Completa</span><span class="item-desc">Carne, jamón, queso, huevo, lechuga y tomate.</span></div>
-                <div class="item-price">$13.000</div>
+                <div><span class="item-name">Bacon</span><span class="item-desc">Panceta, cheddar y cebolla caramelizada.</span></div>
+                <div class="item-price">$22.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">The Lirium</span><span class="item-desc">Carne, provoleta, rúcula, cebolla caramelizada y mayo de cerveza negra.</span></div>
-                <div class="item-price">$14.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Veggie</span><span class="item-desc">Medallón de legumbres, queso, rúcula, tomate y alioli.</span></div>
-                <div class="item-price">$12.000</div>
+                <div><span class="item-name">Doble cheddar</span><span class="item-desc">Dos medallones de carne y cheddar.</span></div>
+                <div class="item-price">$22.000</div>
             </div>
 
             <p class="nota reveal">Todas nuestras hamburguesas acompañadas con papas.</p>
@@ -614,17 +637,12 @@
 
             <div class="menu-item reveal">
                 <div><span class="item-name">Carne</span><span class="item-desc">Carne braseada, cebolla y especias.</span></div>
-                <div class="item-price">$6.000</div>
+                <div class="item-price">$4.000 c/u</div>
             </div>
 
             <div class="menu-item reveal">
                 <div><span class="item-name">Jamón y queso</span><span class="item-desc">Jamón, queso y un toque de orégano.</span></div>
-                <div class="item-price">$6.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Vegana</span><span class="item-desc">Relleno vegetal especiado.</span></div>
-                <div class="item-price">$6.000</div>
+                <div class="item-price">$4.000 c/u</div>
             </div>
 
             <!-- PIZZAS -->
@@ -632,86 +650,40 @@
 
             <div class="menu-item reveal">
                 <div><span class="item-name">Muzzarella</span><span class="item-desc">Muzzarella, salsa de tomate y orégano.</span></div>
-                <div class="item-price">$11.000</div>
+                <div class="item-price">$26.000</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Especial</span><span class="item-desc">Muzzarella, jamón y morrón.</span></div>
-                <div class="item-price">$13.000</div>
+                <div><span class="item-name">Jamón y muzzarella</span><span class="item-desc">Muzzarella y jamón.</span></div>
+                <div class="item-price">$27.500</div>
             </div>
 
             <div class="menu-item reveal">
-                <div><span class="item-name">Fugazzeta</span><span class="item-desc">Muzzarella, cebolla y orégano.</span></div>
-                <div class="item-price">$13.000</div>
+                <div><span class="item-name">Especial con morrón</span><span class="item-desc">Muzzarella, jamón y morrón.</span></div>
+                <div class="item-price">$27.500</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Cuatro Quesos</span><span class="item-desc">Selección de cuatro quesos.</span></div>
+                <div class="item-price">$29.500</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Fugazzetta</span><span class="item-desc">Muzzarella, cebolla y orégano.</span></div>
+                <div class="item-price">$27.500</div>
+            </div>
+
+            <div class="menu-item reveal">
+                <div><span class="item-name">Rúcula y jamón crudo</span><span class="item-desc">Muzzarella, rúcula fresca, jamón crudo, parmesano y aceitunas.</span></div>
+                <div class="item-price">$30.000</div>
             </div>
 
             <div class="menu-item reveal">
                 <div><span class="item-name">Napolitana</span><span class="item-desc">Muzzarella, tomate, ajo y orégano.</span></div>
-                <div class="item-price">$12.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Rúcula &amp; crudo</span><span class="item-desc">Muzzarella, rúcula fresca, jamón crudo, parmesano y aceitunas.</span></div>
-                <div class="item-price">$14.000</div>
+                <div class="item-price">$27.500</div>
             </div>
 
             <p class="nota reveal">“El buen sabor también es un viaje.”</p>
-
-            <!-- ENSALADAS -->
-            <h2 class="section-title reveal" id="ensaladas">Ensaladas</h2>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Ensalada 01</span><span class="item-desc">Verdes, rúcula, cherry, jamón crudo, parmesano, nueces tostadas y vinagreta de mostaza y miel.</span></div>
-                <div class="item-price">$11.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Ensalada 02</span><span class="item-desc">Rúcula, roquefort, pera, aceitunas negras, nueces, oliva y un toque de miel.</span></div>
-                <div class="item-price">$11.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Ensalada 03</span><span class="item-desc">Pollo grillado, palta, verdes, cherry, zanahoria, semillas tostadas y aderezo cítrico.</span></div>
-                <div class="item-price">$12.000</div>
-            </div>
-
-            <!-- OPCIONES VEGANAS -->
-            <h2 class="section-title reveal" id="veganas">Opciones veganas</h2>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Buñuelos verdes</span><span class="item-desc">Espinaca y acelga ligadas con harina de garbanzo, especias y hierbas. Fritos y crocantes.</span></div>
-                <div class="item-price">$8.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Empanadas veganas</span><span class="item-desc">Relleno vegetal especiado.</span></div>
-                <div class="item-price">$8.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Vegetales crocantes</span><span class="item-desc">Selección de vegetales rebozados acompañados con hummus.</span></div>
-                <div class="item-price">$8.000</div>
-            </div>
-
-            <!-- POSTRES -->
-            <h2 class="section-title reveal" id="postres">Postres</h2>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Helado</span><span class="item-desc">Dos bochas a elección.</span></div>
-                <div class="item-price">$5.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Brownie &amp; Helado</span><span class="item-desc">Brownie tibio acompañado con helado.</span></div>
-                <div class="item-price">$7.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Cheesecake</span><span class="item-desc">Porción de cheesecake de la casa.</span></div>
-                <div class="item-price">$7.000</div>
-            </div>
-
-            <p class="nota reveal">“Buena comida, mejores encuentros.”</p>
         </div>
 
         <!-- =========================================
@@ -840,6 +812,14 @@
         </footer>
     </div>
 
+    <div id="zoom" aria-hidden="true">
+        <div id="zoom-fondo"></div>
+        <img id="zoom-img" src="" alt="">
+        <div class="zoom-nombre" id="zoom-nombre"></div>
+        <div class="zoom-desc" id="zoom-desc"></div>
+        <div class="zoom-precio" id="zoom-precio"></div>
+    </div>
+
     <button class="sound-toggle" id="sound-toggle" type="button" aria-label="Activar o silenciar sonido" title="Sonido">🔊</button>
 
     <script>
@@ -930,7 +910,8 @@
             const el = tarjeta.querySelector('.item-name');
             if (!el) return;
             const nombre = el.textContent.trim();
-            ponerFoto(tarjeta, nombreDeArchivo(nombre), nombre, 0);
+            // data-foto permite que el archivo tenga un nombre distinto al del plato
+            ponerFoto(tarjeta, tarjeta.dataset.foto || nombreDeArchivo(nombre), nombre, 0);
         });
 
         // =========================================
@@ -1216,7 +1197,183 @@
             window.addEventListener(ev, iniciarAudio, { passive: true });
         });
 
-        botonSonido.addEventListener('click', function() {
+        // =========================================
+        // ZOOM: tocar un plato/bebida lo agranda; tocar de nuevo vuelve al scroll
+        // =========================================
+        const zoomEl = document.getElementById('zoom');
+        const zoomFondo = document.getElementById('zoom-fondo');
+        const zoomImg = document.getElementById('zoom-img');
+        const zoomTextos = [
+            { destino: document.getElementById('zoom-nombre'), origen: '.item-name',  retraso: 70 },
+            { destino: document.getElementById('zoom-desc'),   origen: '.item-desc',  retraso: 130 },
+            { destino: document.getElementById('zoom-precio'), origen: '.item-prices, .item-price', retraso: 190 }
+        ];
+        const SELECTOR_FOTO = '.item-foto, .drink-img';
+        const EASE_ZOOM = 'cubic-bezier(0.22, 0.9, 0.25, 1)';
+        const zoomBarra = document.getElementById('top-fixed'); // logo + botones
+        const DUR_BARRA = 450;
+        let zoomTarjeta = null, zoomAnimando = false, zoomBarraAnim = null;
+        let zoomBloqueado = false, zoomScrollY = 0;
+
+        function centroDe(r) { return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+
+        // Distancia que hay que subir la barra para que salga completa de la pantalla
+        function distanciaBarra() { return Math.ceil(zoomBarra.getBoundingClientRect().height) + 40; }
+        function barraY(px) { return 'translateY(' + px + 'px)'; }
+
+        // Transformación que lleva la imagen ampliada a la posición y tamaño de la foto en la carta
+        function transformImagen(foto) {
+            const s = foto.getBoundingClientRect();
+            const d = zoomImg.getBoundingClientRect();
+            const iw = foto.naturalWidth || 1, ih = foto.naturalHeight || 1;
+            const ajuste = (w, h) => Math.min(w / iw, h / ih); // object-fit: contain
+            const k = ajuste(s.width, s.height) / ajuste(d.width, d.height);
+            const cs = centroDe(s), cd = centroDe(d);
+            return 'translate(' + (cs.x - cd.x) + 'px, ' + (cs.y - cd.y) + 'px) scale(' + k + ')';
+        }
+
+        // Lo mismo para cada texto (origen arriba-izquierda), escalando por tamaño de letra
+        function transformTexto(destino, origen) {
+            if (!origen) return null;
+            const s = origen.getBoundingClientRect();
+            const d = destino.getBoundingClientRect();
+            if (!d.width || !d.height) return null;
+            const k = parseFloat(getComputedStyle(origen).fontSize) / parseFloat(getComputedStyle(destino).fontSize);
+            return 'translate(' + (s.left - d.left) + 'px, ' + (s.top - d.top) + 'px) scale(' + k + ')';
+        }
+
+        // ABRIR: 1) sube la barra del logo y los botones, 2) recién después se agranda la foto
+        function abrirZoom(tarjeta) {
+            const foto = tarjeta.querySelector(SELECTOR_FOTO);
+            if (!foto || zoomAnimando) return; // sin foto no hay nada que agrandar
+            zoomTarjeta = tarjeta;
+            zoomAnimando = true;
+
+            zoomImg.decoding = 'sync';
+            zoomImg.src = foto.currentSrc || foto.src;
+            zoomImg.alt = foto.alt;
+            zoomTextos.forEach(function(t) {
+                const o = tarjeta.querySelector(t.origen);
+                t.destino.innerHTML = o ? o.innerHTML.trim() : '';
+            });
+            if (!tarjeta.querySelector('.item-name')) zoomTextos[0].destino.textContent = foto.alt;
+
+            // El scroll se frena sin tocar "overflow": el body tiene overflow-x oculto y, si el html
+            // también se bloquea, el body pasa a ser el contenedor de scroll y la barra pegajosa salta.
+            zoomScrollY = window.scrollY;
+            zoomBloqueado = true;
+
+            const px = distanciaBarra();
+            zoomBarraAnim = zoomBarra.animate(
+                [{ transform: barraY(0) }, { transform: barraY(-px) }],
+                { duration: DUR_BARRA, easing: EASE_ZOOM, fill: 'forwards' }
+            );
+            const paso2 = function() {
+                try { ampliar(tarjeta, foto); } catch (err) { zoomAnimando = false; }
+            };
+            zoomBarraAnim.finished.then(paso2, paso2);
+        }
+
+        function ampliar(tarjeta, foto) {
+            zoomEl.classList.add('abierto');
+            zoomEl.setAttribute('aria-hidden', 'false');
+
+            // Se mide con todo en su lugar final y recién después se anima
+            const origenes = zoomTextos.map(t => tarjeta.querySelector(t.origen));
+            const tImg = transformImagen(foto);
+            const tTextos = zoomTextos.map((t, i) => transformTexto(t.destino, origenes[i]));
+
+            // Lo que se agranda "sale" de la carta: el original se oculta mientras dura el zoom
+            foto.style.visibility = 'hidden';
+            origenes.forEach(o => { if (o) o.style.visibility = 'hidden'; });
+
+            const dur = 540;
+            const anims = [];
+            anims.push(zoomFondo.animate([{ opacity: 0 }, { opacity: 1 }], { duration: dur * 0.7, easing: 'ease-out' }));
+            anims.push(zoomImg.animate([{ transform: tImg }, { transform: 'none' }], { duration: dur, easing: EASE_ZOOM }));
+            zoomTextos.forEach(function(t, i) {
+                if (!tTextos[i]) return;
+                anims.push(t.destino.animate([
+                    { transform: tTextos[i], opacity: 0 },
+                    { opacity: 1, offset: 0.3 },
+                    { transform: 'none', opacity: 1 }
+                ], { duration: dur, delay: t.retraso, easing: EASE_ZOOM, fill: 'backwards' }));
+            });
+            Promise.all(anims.map(a => a.finished)).catch(function() {}).then(function() { zoomAnimando = false; });
+        }
+
+        // CERRAR: 1) la foto vuelve a su lugar, 2) recién después baja la barra del logo y los botones
+        function cerrarZoom() {
+            if (!zoomEl.classList.contains('abierto') || zoomAnimando || !zoomTarjeta) return;
+            const tarjeta = zoomTarjeta;
+            const foto = tarjeta.querySelector(SELECTOR_FOTO);
+            const origenes = zoomTextos.map(t => tarjeta.querySelector(t.origen));
+            zoomAnimando = true;
+
+            const dur = 440;
+            const anims = [];
+            anims.push(zoomFondo.animate([{ opacity: 1 }, { opacity: 0 }], { duration: dur, easing: 'ease-in', fill: 'forwards' }));
+            anims.push(zoomImg.animate([{ transform: 'none' }, { transform: transformImagen(foto) }], { duration: dur, easing: EASE_ZOOM, fill: 'forwards' }));
+            zoomTextos.forEach(function(t, i) {
+                const tr = transformTexto(t.destino, origenes[i]);
+                if (!tr) return;
+                anims.push(t.destino.animate([
+                    { transform: 'none', opacity: 1 },
+                    { opacity: 1, offset: 0.55 },
+                    { transform: tr, opacity: 0 }
+                ], { duration: dur, easing: EASE_ZOOM, fill: 'forwards' }));
+                // el texto original reaparece suavemente en su lugar al llegar
+                origenes[i].style.visibility = '';
+                origenes[i].animate([{ opacity: 0 }, { opacity: 1 }], { duration: dur * 0.45, delay: dur * 0.55, fill: 'backwards' });
+            });
+
+            Promise.all(anims.map(a => a.finished)).catch(function() {}).then(function() {
+                // La foto ya está en su lugar: se saca el zoom y recién ahora baja la barra
+                zoomEl.getAnimations({ subtree: true }).forEach(a => a.cancel());
+                zoomEl.classList.remove('abierto');
+                zoomEl.setAttribute('aria-hidden', 'true');
+                if (foto) foto.style.visibility = '';
+
+                const px = distanciaBarra();
+                if (zoomBarraAnim) zoomBarraAnim.cancel();
+                const bajar = zoomBarra.animate(
+                    [{ transform: barraY(-px) }, { transform: barraY(0) }],
+                    { duration: DUR_BARRA, easing: EASE_ZOOM, fill: 'both' }
+                );
+                zoomBarraAnim = bajar;
+                const fin = function() {
+                    bajar.cancel();
+                    zoomBarraAnim = null;
+                    zoomBloqueado = false;
+                    zoomTarjeta = null;
+                    zoomAnimando = false;
+                };
+                bajar.finished.then(fin, fin);
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (zoomAnimando) return;
+            if (zoomEl.classList.contains('abierto')) { cerrarZoom(); return; }
+            const tarjeta = e.target.closest('.menu-item, .drink-item');
+            if (tarjeta) abrirZoom(tarjeta);
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') cerrarZoom();
+        });
+        // Bloqueo del scroll mientras dura el zoom (rueda, dedo y teclado)
+        function frenarScroll(e) { if (zoomBloqueado) e.preventDefault(); }
+        window.addEventListener('wheel', frenarScroll, { passive: false });
+        document.addEventListener('touchmove', frenarScroll, { passive: false });
+        window.addEventListener('keydown', function(e) {
+            if (zoomBloqueado && [' ', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault();
+        });
+        // Respaldo (por ejemplo, si arrastran la barra de scroll): vuelve al mismo punto
+        window.addEventListener('scroll', function() {
+            if (zoomBloqueado && window.scrollY !== zoomScrollY) window.scrollTo({ top: zoomScrollY, behavior: 'instant' });
+        });
+
+botonSonido.addEventListener('click', function() {
             iniciarAudio();
             sonidoActivo = !sonidoActivo;
             botonSonido.textContent = sonidoActivo ? '🔊' : '🔇';
