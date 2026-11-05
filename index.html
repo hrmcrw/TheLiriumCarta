@@ -231,7 +231,7 @@
             box-shadow: 0 -8px 24px -10px var(--gold-glow);
         }
         .bottom-nav .nav-buttons { max-width: 600px; margin: 0 auto; }
-        .bottom-nav .nav-btn { padding: 14px 12px; font-size: 0.85rem; }
+        .bottom-nav .nav-btn { padding: 16px 12px; font-size: 0.92rem; letter-spacing: 1.6px; border-radius: 8px; }
 
         .nav-btn.active-btn {
             color: #000;
@@ -255,38 +255,54 @@
         }
         .nav-btn:not(.active-btn) { animation: latido 2.6s ease-in-out infinite; }
 
-        /* Categorías: grilla pareja, 3 columnas, todos del mismo tamaño */
+        /* Categorías: índice de texto en una sola fila (secundario: los botones principales están abajo) */
         .chips {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: 10px;
+            position: relative;
+            display: flex;
+            gap: 4px;
+            margin: 4px -20px 0;
+            padding: 0 20px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
         }
+        .chips::-webkit-scrollbar { display: none; }
+        /* centradas cuando entran; alineadas al inicio y deslizables cuando no entran */
+        .chips::before, .chips::after { content: ''; margin: auto; }
         .chips.oculto { display: none; }
-        /* el séptimo queda centrado en la última fila */
-        .chips .chip:last-child:nth-child(3n + 1) { grid-column: 2; }
 
         .chip {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 36px;
-            padding: 0 4px;
-            text-align: center;
-            line-height: 1.1;
+            position: relative;
+            flex: 0 0 auto;
+            display: block;
+            padding: 9px 10px 11px;
+            white-space: nowrap;
             font-family: 'Cinzel', serif;
-            font-size: min(0.7rem, 2.7vw);
+            font-size: 0.7rem;
             font-weight: 600;
-            letter-spacing: 0.3px;
+            letter-spacing: 1.2px;
             text-transform: uppercase;
-            color: var(--gold-light);
             text-decoration: none;
-            border: 1px solid rgba(212, 175, 55, 0.5);
-            border-radius: 8px;
-            background: rgba(212, 175, 55, 0.08);
-            transition: background 0.3s ease, color 0.3s ease;
+            color: rgba(244, 236, 216, 0.6);
+            background: none;
+            border: 0;
+            -webkit-tap-highlight-color: transparent;
+            transition: color 0.3s ease;
         }
-        .chip:hover, .chip:active { background: var(--gold); color: #000; }
+        .chip::after {
+            content: '';
+            position: absolute;
+            left: 10px; right: 10px; bottom: 4px;
+            height: 2px;
+            background: var(--gold-gradient);
+            transform: scaleX(0);
+            transition: transform 0.35s ease;
+        }
+        .chip:hover { color: var(--gold-light); }
+        .chip.activo { color: var(--gold-light); }
+        .chip.activo::after { transform: scaleX(1); }
 
         /* =========================================
            SISTEMA DE PESTAÑAS (MOSTRAR/OCULTAR)
@@ -403,9 +419,6 @@
         }
 
         /* Subbotones de Bebidas (mismo estilo que las categorías) */
-        .chips.chips-2 { grid-template-columns: repeat(2, 1fr); }
-        button.chip { cursor: pointer; font-family: 'Cinzel', serif; }
-        .chip.activo { background: var(--gold-gradient); color: #000; border-color: #fff; }
         .nota {
             text-align: center;
             font-style: italic;
@@ -1667,6 +1680,7 @@
         // =========================================
         const arribaBtn = document.getElementById('arriba-btn');
 
+        let chipVisto = null;
         function actualizarChips() {
             const grupo = document.querySelector('.chips:not(.oculto)');
             if (grupo) {
@@ -1680,6 +1694,12 @@
                 // al llegar al final de la página queda marcada la última
                 if (window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) activo = chips[chips.length - 1];
                 chips.forEach(c => c.classList.toggle('activo', c === activo));
+                if (activo !== chipVisto) {
+                    chipVisto = activo;
+                    if (grupo.scrollWidth > grupo.clientWidth + 2) {
+                        grupo.scrollTo({ left: activo.offsetLeft - (grupo.clientWidth - activo.offsetWidth) / 2, behavior: 'smooth' });
+                    }
+                }
             }
             arribaBtn.classList.toggle('visible', window.scrollY > 500);
         }
