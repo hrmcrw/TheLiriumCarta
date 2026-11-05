@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#050a05">
     <title>The Lirium - Carta</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -115,7 +115,7 @@
         .menu-container {
             max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 20px calc(var(--bottom-h, 72px) + 24px);
             position: relative;
             z-index: 2;
         }
@@ -198,6 +198,23 @@
 
         .nav-btn:hover { background: rgba(212, 175, 55, 0.12); }
 
+        /* Barra inferior fija (Comidas / Bebidas) */
+        .bottom-nav {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 55;
+            padding: 10px 20px calc(10px + env(safe-area-inset-bottom, 0px));
+            background: rgba(5, 10, 5, 0.94);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border-top: 2px solid var(--gold);
+            box-shadow: 0 -8px 24px -10px var(--gold-glow);
+        }
+        .bottom-nav .nav-buttons { max-width: 600px; margin: 0 auto; }
+        .bottom-nav .nav-btn { padding: 14px 12px; font-size: 0.85rem; }
+
         .nav-btn.active-btn {
             color: #000;
             background: var(--gold-gradient);
@@ -258,6 +275,12 @@
            ========================================= */
         .seccion-oculta { display: none; }
 
+        /* Entrada lateral al cambiar de pestaña deslizando */
+        @keyframes entraDer { from { opacity: 0; transform: translateX(48px); } to { opacity: 1; transform: none; } }
+        @keyframes entraIzq { from { opacity: 0; transform: translateX(-48px); } to { opacity: 1; transform: none; } }
+        .seccion-visible.desde-der { animation: entraDer 0.4s ease-out both; }
+        .seccion-visible.desde-izq { animation: entraIzq 0.4s ease-out both; }
+
         .seccion-visible {
             display: block;
             animation: fadeIn 0.5s ease-in-out forwards;
@@ -313,8 +336,8 @@
             box-shadow: 0 8px 15px rgba(0,0,0,0.5), 0 0 10px var(--gold-glow);
         }
 
-        .item-name { font-weight: 600; font-size: 1.15rem; padding-right: 10px; display: block; text-shadow: 1px 1px 2px #000; }
-        .item-desc { font-size: 1rem; color: #c4bba6; font-style: italic; display: block; margin-top: 2px; }
+        .item-name { font-weight: 600; font-size: 1.2rem; padding-right: 10px; display: block; text-shadow: 1px 1px 2px #000; }
+        .item-desc { font-size: 1.08rem; line-height: 1.3; color: #e6dec9; font-style: italic; display: block; margin-top: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.9); }
 
 
         .item-price {
@@ -327,17 +350,39 @@
         .menu-item .item-price { align-self: flex-end; }
 
         /* Foto opcional: aparece solo si existe un archivo con el nombre del plato */
-        .menu-item.con-foto { align-items: center; gap: 14px; }
-        .menu-item.con-foto > div:first-of-type { flex: 1; min-width: 0; }
-        .menu-item.con-foto .item-price { align-self: center; }
-        .item-foto {
+        .menu-item.con-espacio { align-items: center; gap: 14px; }
+        .menu-item.con-espacio > div:first-of-type { flex: 1; min-width: 0; }
+        .menu-item.con-espacio .item-price { align-self: center; }
+        /* Espacio de foto reservado desde el inicio: las tarjetas miden lo mismo con o sin foto
+           y nada se corre cuando la foto termina de cargar */
+        .foto-slot {
+            position: relative;
             flex: 0 0 auto;
             width: 96px;
             height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .foto-slot::before { content: '❖'; font-size: 1.7rem; color: rgba(212, 175, 55, 0.28); }
+        .foto-slot.cargada::before { display: none; }
+        .item-foto {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
             filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+            opacity: 0;
+            transition: opacity 0.45s ease;
         }
-        @media (max-width: 420px) { .item-foto { width: 80px; height: 100px; } }
+        .item-foto.lista { opacity: 1; }
+        @media (max-width: 420px) {
+            .foto-slot { width: 80px; height: 100px; }
+            /* en pantallas angostas los dos precios van en una fila debajo del nombre */
+            .menu-item.variantes { flex-wrap: wrap; }
+            .menu-item.variantes .item-prices { flex-basis: 100%; flex-direction: row; justify-content: flex-end; gap: 18px; }
+        }
 
         /* Subbotones de Bebidas (mismo estilo que las categorías) */
         .chips.chips-2 { grid-template-columns: repeat(2, 1fr); }
@@ -380,10 +425,11 @@
         .menu-item.variantes { align-items: center; }
         .item-prices { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
         .price-row { display: flex; align-items: baseline; gap: 10px; }
-        .price-row .item-price { align-self: auto; }
+        .menu-item .price-row .item-price { align-self: auto; }
         .price-row .size {
-            font-size: 0.85rem; font-style: italic; color: #c4bba6;
+            font-size: 0.9rem; font-style: italic; color: #e0d7c0;
             text-transform: uppercase; letter-spacing: 1px;
+            min-width: 3.6em; text-align: right;
         }
 
         /* Layout para los Tragos: imagen | descripción | precio */
@@ -468,7 +514,7 @@
         .sound-toggle {
             position: fixed;
             right: 16px;
-            bottom: 16px;
+            bottom: calc(var(--bottom-h, 72px) + 12px);
             z-index: 60;
             width: 44px;
             height: 44px;
@@ -526,10 +572,47 @@
             text-shadow: 0 0 12px var(--gold-glow);
         }
         #zoom .zoom-desc:empty { display: none; }
-        #zoom .zoom-desc { font-size: 1.05rem; font-style: italic; color: #c4bba6; max-width: 420px; }
+        #zoom .zoom-desc { font-size: 1.15rem; font-style: italic; color: #e6dec9; max-width: 420px; }
         #zoom .zoom-precio .price-row { justify-content: center; gap: 12px; margin-top: 2px; }
         #zoom .zoom-precio .item-price { font-size: 1.3rem; }
         #zoom .zoom-precio .size { font-size: 0.95rem; }
+        #zoom { touch-action: none; }
+        #zoom #zoom-cerrar, #zoom #zoom-prev, #zoom #zoom-next, #zoom #zoom-ayuda { position: absolute; }
+        #zoom #zoom-cerrar {
+            top: 14px; right: 14px; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; border: 1.5px solid rgba(212, 175, 55, 0.6);
+            background: rgba(5, 10, 5, 0.6); color: var(--gold);
+            font-size: 1.1rem; line-height: 1; cursor: pointer;
+        }
+        #zoom .zoom-flecha {
+            top: 50%; margin-top: -24px; width: 38px; height: 48px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.4);
+            background: rgba(5, 10, 5, 0.45); color: var(--gold);
+            font-size: 2rem; line-height: 1; cursor: pointer;
+        }
+        #zoom #zoom-prev { left: 8px; }
+        #zoom #zoom-next { right: 8px; }
+        #zoom #zoom-ayuda {
+            bottom: 18px; left: 0; right: 0;
+            font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 1.5px;
+            text-transform: uppercase; color: rgba(244, 236, 216, 0.6);
+        }
+
+        /* Volver arriba */
+        .arriba-btn {
+            position: fixed; right: 16px; bottom: calc(var(--bottom-h, 72px) + 66px); z-index: 60;
+            width: 44px; height: 44px; border-radius: 50%;
+            border: 1.5px solid rgba(212, 175, 55, 0.7);
+            background: rgba(5, 10, 5, 0.85); color: var(--gold);
+            font-size: 1.3rem; line-height: 1; cursor: pointer;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
+            opacity: 0; pointer-events: none; transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease;
+        }
+        .arriba-btn.visible { opacity: 1; pointer-events: auto; transform: none; }
+        .arriba-btn:hover { background: rgba(212, 175, 55, 0.18); }
         #zoom .zoom-precio { font-family: 'Cinzel', serif; font-size: 1.3rem; font-weight: 800; color: var(--gold); }
 
         /* Respeta a quien tiene animaciones reducidas en su celular */
@@ -537,6 +620,7 @@
             html { scroll-behavior: auto; }
             .reveal { opacity: 1; transform: none; transition: none; }
             .section-title, .logo-image-container, .seccion-visible, .nav-btn:not(.active-btn) { animation: none; }
+            .seccion-visible.desde-der, .seccion-visible.desde-izq { animation: none; }
             #magic-bg, .sparkle { display: none; }
         }
 
@@ -567,10 +651,6 @@
 
         <!-- NAVEGACIÓN FIJA -->
         <nav class="top-nav" aria-label="Carta">
-            <div class="nav-buttons" role="tablist">
-                <button class="nav-btn active-btn" role="tab" aria-selected="true" onclick="mostrarSeccion('comidas', this)">Comidas</button>
-                <button class="nav-btn" role="tab" aria-selected="false" onclick="mostrarSeccion('bebidas', this)">Bebidas</button>
-            </div>
             <div class="chips" id="chips-comidas">
                 <a class="chip" href="#para-picar">Para picar</a>
                 <a class="chip" href="#hamburguesas">Hamburguesas</a>
@@ -813,15 +893,28 @@
         </footer>
     </div>
 
+    <!-- BARRA INFERIOR: Comidas / Bebidas, al alcance del pulgar -->
+    <nav class="bottom-nav" id="bottom-nav" aria-label="Secciones">
+        <div class="nav-buttons" role="tablist">
+            <button class="nav-btn active-btn" id="tab-comidas" role="tab" aria-selected="true" onclick="mostrarSeccion('comidas', this)">Comidas</button>
+            <button class="nav-btn" id="tab-bebidas" role="tab" aria-selected="false" onclick="mostrarSeccion('bebidas', this)">Bebidas</button>
+        </div>
+    </nav>
+
     <div id="zoom" aria-hidden="true">
         <div id="zoom-fondo"></div>
         <img id="zoom-img" src="" alt="">
         <div class="zoom-nombre" id="zoom-nombre"></div>
         <div class="zoom-desc" id="zoom-desc"></div>
         <div class="zoom-precio" id="zoom-precio"></div>
+        <button id="zoom-cerrar" type="button" aria-label="Cerrar">✕</button>
+        <button id="zoom-prev" class="zoom-flecha" type="button" aria-label="Anterior">‹</button>
+        <button id="zoom-next" class="zoom-flecha" type="button" aria-label="Siguiente">›</button>
+        <div id="zoom-ayuda">Tocá para cerrar · Deslizá para ver más</div>
     </div>
 
     <button class="sound-toggle" id="sound-toggle" type="button" aria-label="Activar o silenciar sonido" title="Sonido">🔊</button>
+    <button class="arriba-btn" id="arriba-btn" type="button" aria-label="Volver arriba" title="Volver arriba">↑</button>
 
     <script>
         const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -829,6 +922,8 @@
         function medirBarraFija() {
             const t = document.getElementById('top-fixed');
             document.documentElement.style.setProperty('--top-h', (t.offsetHeight + 12) + 'px');
+            const b = document.getElementById('bottom-nav');
+            if (b) document.documentElement.style.setProperty('--bottom-h', b.offsetHeight + 'px');
         }
         window.addEventListener('load', medirBarraFija);
         window.addEventListener('resize', medirBarraFija);
@@ -870,6 +965,7 @@
             document.getElementById('chips-bebidas').classList.toggle('oculto', seccion !== 'bebidas');
 
             medirBarraFija();
+            programarChips();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -894,14 +990,16 @@
             if (i >= EXTENSIONES_FOTO.length) return;
             const probe = new Image();
             probe.onload = function() {
+                const slot = tarjeta.querySelector('.foto-slot');
                 const img = document.createElement('img');
                 img.src = probe.src;
                 img.alt = nombre;
                 img.className = 'item-foto';
-                img.loading = 'lazy';
                 img.decoding = 'async';
+                slot.appendChild(img);
+                slot.classList.add('cargada');
                 tarjeta.classList.add('con-foto');
-                tarjeta.insertBefore(img, tarjeta.firstChild);
+                requestAnimationFrame(function() { img.classList.add('lista'); }); // aparece con un fundido
             };
             probe.onerror = function() { ponerFoto(tarjeta, base, nombre, i + 1); };
             probe.src = base + '.' + EXTENSIONES_FOTO[i];
@@ -911,6 +1009,12 @@
             const el = tarjeta.querySelector('.item-name');
             if (!el) return;
             const nombre = el.textContent.trim();
+            // el lugar de la foto se reserva ya, con o sin foto
+            const slot = document.createElement('span');
+            slot.className = 'foto-slot';
+            slot.setAttribute('aria-hidden', 'true');
+            tarjeta.classList.add('con-espacio');
+            tarjeta.insertBefore(slot, tarjeta.firstChild);
             // data-foto permite que el archivo tenga un nombre distinto al del plato
             ponerFoto(tarjeta, tarjeta.dataset.foto || nombreDeArchivo(nombre), nombre, 0);
         });
@@ -1226,8 +1330,13 @@
         const EASE_ZOOM = 'cubic-bezier(0.22, 0.9, 0.25, 1)';
         const zoomBarra = document.getElementById('top-fixed'); // logo + botones
         const DUR_BARRA = 450;
-        let zoomTarjeta = null, zoomAnimando = false, zoomBarraAnim = null;
+        const zoomBarraInf = document.getElementById('bottom-nav'); // Comidas / Bebidas
+        function distanciaBarraInf() { return Math.ceil(zoomBarraInf.getBoundingClientRect().height) + 40; }
+        let zoomTarjeta = null, zoomAnimando = false, zoomBarraAnim = null, zoomBarraInfAnim = null;
         let zoomBloqueado = false, zoomScrollY = 0;
+        const zoomPrev = document.getElementById('zoom-prev');
+        const zoomNext = document.getElementById('zoom-next');
+        const zoomExtras = ['zoom-cerrar', 'zoom-ayuda', 'zoom-prev', 'zoom-next'].map(id => document.getElementById(id));
 
         function centroDe(r) { return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
 
@@ -1256,13 +1365,9 @@
             return 'translate(' + (s.left - d.left) + 'px, ' + (s.top - d.top) + 'px) scale(' + k + ')';
         }
 
-        // ABRIR: 1) sube la barra del logo y los botones, 2) recién después se agranda la foto
-        function abrirZoom(tarjeta) {
+        // Pasa la foto y los textos de una tarjeta al zoom
+        function cargarEnZoom(tarjeta) {
             const foto = tarjeta.querySelector(SELECTOR_FOTO);
-            if (!foto || zoomAnimando) return; // sin foto no hay nada que agrandar
-            zoomTarjeta = tarjeta;
-            zoomAnimando = true;
-
             zoomImg.decoding = 'sync';
             zoomImg.src = foto.currentSrc || foto.src;
             zoomImg.alt = foto.alt;
@@ -1271,6 +1376,81 @@
                 t.destino.innerHTML = o ? o.innerHTML.trim() : '';
             });
             if (!tarjeta.querySelector('.item-name')) zoomTextos[0].destino.textContent = foto.alt;
+            return foto;
+        }
+
+        // Platos con foto de la pestaña actual, en orden (para pasar al anterior / siguiente)
+        function tarjetasZoom() {
+            const seccion = zoomTarjeta.closest('#seccion-comidas, #seccion-bebidas');
+            return Array.from(seccion.querySelectorAll('.menu-item, .drink-item')).filter(t => t.querySelector(SELECTOR_FOTO));
+        }
+
+        function actualizarFlechas() {
+            const lista = tarjetasZoom(), i = lista.indexOf(zoomTarjeta);
+            zoomPrev.style.visibility = i > 0 ? 'visible' : 'hidden';
+            zoomNext.style.visibility = i < lista.length - 1 ? 'visible' : 'hidden';
+        }
+
+        // Si la tarjeta nueva quedó fuera de pantalla, se la trae a la vista (sin animar)
+        function traerAVista(t) {
+            const r = t.getBoundingClientRect();
+            const alto = window.innerHeight;
+            if (r.top >= zoomBarra.offsetHeight + 12 && r.bottom <= alto - 20) return;
+            const destino = window.scrollY + r.top - (alto / 2 - r.height / 2);
+            window.scrollTo({ top: Math.max(0, destino), behavior: 'instant' });
+            zoomScrollY = window.scrollY;
+        }
+
+        // Pasar al plato anterior (-1) o siguiente (+1) sin cerrar el zoom
+        function navegarZoom(dir) {
+            if (zoomAnimando || !zoomEl.classList.contains('abierto') || !zoomTarjeta) return;
+            const lista = tarjetasZoom();
+            const nueva = lista[lista.indexOf(zoomTarjeta) + dir];
+            if (!nueva) return;
+            zoomAnimando = true;
+            const vieja = zoomTarjeta;
+            const mover = 70 * dir;
+            const partes = [zoomImg].concat(zoomTextos.map(t => t.destino));
+            const salida = partes.map(e => e.animate(
+                [{ transform: 'none', opacity: 1 }, { transform: 'translateX(' + (-mover) + 'px)', opacity: 0 }],
+                { duration: 180, easing: 'ease-in', fill: 'forwards' }
+            ));
+            Promise.all(salida.map(a => a.finished)).catch(function() {}).then(function() {
+                try {
+                    // la tarjeta anterior vuelve a mostrarse completa
+                    const fv = vieja.querySelector(SELECTOR_FOTO);
+                    if (fv) fv.style.visibility = '';
+                    zoomTextos.forEach(function(t) {
+                        const o = vieja.querySelector(t.origen);
+                        if (o) o.style.visibility = '';
+                    });
+                    zoomTarjeta = nueva;
+                    traerAVista(nueva);
+                    const foto = cargarEnZoom(nueva);
+                    foto.style.visibility = 'hidden';
+                    zoomTextos.forEach(function(t) {
+                        const o = nueva.querySelector(t.origen);
+                        if (o) o.style.visibility = 'hidden';
+                    });
+                    actualizarFlechas();
+                } catch (err) {}
+                salida.forEach(a => a.cancel());
+                const entrada = partes.map((e, i) => e.animate(
+                    [{ transform: 'translateX(' + mover + 'px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+                    { duration: 300, delay: i * 40, easing: EASE_ZOOM, fill: 'backwards' }
+                ));
+                Promise.all(entrada.map(a => a.finished)).catch(function() {}).then(function() { zoomAnimando = false; });
+            });
+        }
+
+        // ABRIR: 1) sube la barra del logo y los botones, 2) recién después se agranda la foto
+        function abrirZoom(tarjeta) {
+            const foto = tarjeta.querySelector(SELECTOR_FOTO);
+            if (!foto || zoomAnimando) return; // sin foto no hay nada que agrandar
+            zoomTarjeta = tarjeta;
+            zoomAnimando = true;
+
+            cargarEnZoom(tarjeta);
 
             // El scroll se frena sin tocar "overflow": el body tiene overflow-x oculto y, si el html
             // también se bloquea, el body pasa a ser el contenedor de scroll y la barra pegajosa salta.
@@ -1280,6 +1460,10 @@
             const px = distanciaBarra();
             zoomBarraAnim = zoomBarra.animate(
                 [{ transform: barraY(0) }, { transform: barraY(-px) }],
+                { duration: DUR_BARRA, easing: EASE_ZOOM, fill: 'forwards' }
+            );
+            zoomBarraInfAnim = zoomBarraInf.animate(
+                [{ transform: barraY(0) }, { transform: barraY(distanciaBarraInf()) }],
                 { duration: DUR_BARRA, easing: EASE_ZOOM, fill: 'forwards' }
             );
             const paso2 = function() {
@@ -1313,6 +1497,10 @@
                     { transform: 'none', opacity: 1 }
                 ], { duration: dur, delay: t.retraso, easing: EASE_ZOOM, fill: 'backwards' }));
             });
+            actualizarFlechas();
+            zoomExtras.forEach(function(e) {
+                e.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 380, fill: 'backwards' });
+            });
             Promise.all(anims.map(a => a.finished)).catch(function() {}).then(function() { zoomAnimando = false; });
         }
 
@@ -1327,6 +1515,9 @@
             const dur = 440;
             const anims = [];
             anims.push(zoomFondo.animate([{ opacity: 1 }, { opacity: 0 }], { duration: dur, easing: 'ease-in', fill: 'forwards' }));
+            zoomExtras.forEach(function(e) {
+                anims.push(e.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }));
+            });
             anims.push(zoomImg.animate([{ transform: 'none' }, { transform: transformImagen(foto) }], { duration: dur, easing: EASE_ZOOM, fill: 'forwards' }));
             zoomTextos.forEach(function(t, i) {
                 const tr = transformTexto(t.destino, origenes[i]);
@@ -1355,9 +1546,17 @@
                     { duration: DUR_BARRA, easing: EASE_ZOOM, fill: 'both' }
                 );
                 zoomBarraAnim = bajar;
+                if (zoomBarraInfAnim) zoomBarraInfAnim.cancel();
+                const subir = zoomBarraInf.animate(
+                    [{ transform: barraY(distanciaBarraInf()) }, { transform: barraY(0) }],
+                    { duration: DUR_BARRA, easing: EASE_ZOOM, fill: 'both' }
+                );
+                zoomBarraInfAnim = subir;
                 const fin = function() {
                     bajar.cancel();
+                    subir.cancel();
                     zoomBarraAnim = null;
+                    zoomBarraInfAnim = null;
                     zoomBloqueado = false;
                     zoomTarjeta = null;
                     zoomAnimando = false;
@@ -1366,14 +1565,36 @@
             });
         }
 
+        let ignorarClickHasta = 0;
         document.addEventListener('click', function(e) {
+            if (performance.now() < ignorarClickHasta) return; // el toque final de un deslizamiento no cierra
             if (zoomAnimando) return;
-            if (zoomEl.classList.contains('abierto')) { cerrarZoom(); return; }
+            if (zoomEl.classList.contains('abierto')) {
+                const flecha = e.target.closest('.zoom-flecha');
+                if (flecha) { navegarZoom(flecha.id === 'zoom-next' ? 1 : -1); return; }
+                cerrarZoom();
+                return;
+            }
             const tarjeta = e.target.closest('.menu-item, .drink-item');
             if (tarjeta) abrirZoom(tarjeta);
         });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') cerrarZoom();
+            if (e.key === 'ArrowRight') navegarZoom(1);
+            if (e.key === 'ArrowLeft') navegarZoom(-1);
+        });
+        // Deslizar el dedo a los costados dentro del zoom: plato anterior / siguiente
+        let swipeX = 0, swipeY = 0, swipeActivo = false;
+        zoomEl.addEventListener('pointerdown', function(e) { swipeX = e.clientX; swipeY = e.clientY; swipeActivo = true; });
+        zoomEl.addEventListener('pointercancel', function() { swipeActivo = false; });
+        zoomEl.addEventListener('pointerup', function(e) {
+            if (!swipeActivo) return;
+            swipeActivo = false;
+            const dx = e.clientX - swipeX, dy = e.clientY - swipeY;
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                ignorarClickHasta = performance.now() + 400;
+                navegarZoom(dx < 0 ? 1 : -1);
+            }
         });
         // Bloqueo del scroll mientras dura el zoom (rueda, dedo y teclado)
         function frenarScroll(e) { if (zoomBloqueado) e.preventDefault(); }
@@ -1386,6 +1607,68 @@
         window.addEventListener('scroll', function() {
             if (zoomBloqueado && window.scrollY !== zoomScrollY) window.scrollTo({ top: zoomScrollY, behavior: 'instant' });
         });
+
+// =========================================
+        // CATEGORÍA ACTUAL RESALTADA + VOLVER ARRIBA
+        // =========================================
+        const arribaBtn = document.getElementById('arriba-btn');
+
+        function actualizarChips() {
+            const grupo = document.querySelector('.chips:not(.oculto)');
+            if (grupo) {
+                const chips = Array.from(grupo.querySelectorAll('a.chip'));
+                const limite = document.getElementById('top-fixed').offsetHeight + 40;
+                let activo = chips[0];
+                chips.forEach(function(c) {
+                    const t = document.querySelector(c.getAttribute('href'));
+                    if (t && t.getBoundingClientRect().top <= limite) activo = c;
+                });
+                // al llegar al final de la página queda marcada la última
+                if (window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) activo = chips[chips.length - 1];
+                chips.forEach(c => c.classList.toggle('activo', c === activo));
+            }
+            arribaBtn.classList.toggle('visible', window.scrollY > 500);
+        }
+
+        let chipsPendiente = false;
+        function programarChips() {
+            if (chipsPendiente) return;
+            chipsPendiente = true;
+            requestAnimationFrame(function() { chipsPendiente = false; actualizarChips(); });
+        }
+        window.addEventListener('scroll', programarChips, { passive: true });
+        window.addEventListener('resize', programarChips);
+        window.addEventListener('load', programarChips);
+        arribaBtn.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+        programarChips();
+
+// =========================================
+        // DESLIZAR A LOS COSTADOS: cambia entre Comidas y Bebidas
+        // =========================================
+        function cambiarPestana(seccion, dir) {
+            mostrarSeccion(seccion, document.getElementById('tab-' + seccion));
+            document.getElementById('seccion-' + seccion).classList.add(dir > 0 ? 'desde-der' : 'desde-izq');
+        }
+
+        let tabX = 0, tabY = 0, tabT = 0, tabValido = false;
+        document.addEventListener('touchstart', function(e) {
+            const t = e.touches[0];
+            // se ignoran los bordes de la pantalla (gesto de "volver" del celular) y el zoom
+            tabValido = e.touches.length === 1 && !zoomAnimando && !zoomEl.classList.contains('abierto') &&
+                !e.target.closest('#bottom-nav, #zoom') && t.clientX > 24 && t.clientX < window.innerWidth - 24;
+            tabX = t.clientX; tabY = t.clientY; tabT = Date.now();
+        }, { passive: true });
+        document.addEventListener('touchend', function(e) {
+            if (!tabValido) return;
+            tabValido = false;
+            if (zoomAnimando || zoomEl.classList.contains('abierto')) return;
+            const t = e.changedTouches[0];
+            const dx = t.clientX - tabX, dy = t.clientY - tabY;
+            if (Date.now() - tabT > 700 || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 2) return;
+            const enComidas = document.getElementById('seccion-comidas').classList.contains('seccion-visible');
+            if (dx < 0 && enComidas) cambiarPestana('bebidas', 1);
+            else if (dx > 0 && !enComidas) cambiarPestana('comidas', -1);
+        }, { passive: true });
 
 botonSonido.addEventListener('click', function() {
             iniciarAudio();
