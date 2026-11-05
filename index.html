@@ -1027,7 +1027,7 @@
             const delay = audioCtx.createDelay(1.5);
             delay.delayTime.value = 0.36;
             const feedback = audioCtx.createGain();
-            feedback.gain.value = 0.5;
+            feedback.gain.value = 0.65;
             const delayMix = audioCtx.createGain();
             delayMix.gain.value = 0.2;
             tonoFiltro.connect(delay);
@@ -1387,65 +1387,12 @@
             if (zoomBloqueado && window.scrollY !== zoomScrollY) window.scrollTo({ top: zoomScrollY, behavior: 'instant' });
         });
 
-// =========================================
-        // MÚSICA DE FONDO: "01- belltree.mp3" en loop
-        // Los navegadores no permiten sonido hasta que la persona toca la pantalla:
-        // se intenta al abrir y, si no se puede, arranca con el primer toque.
-        // =========================================
-        const VOLUMEN_MUSICA = 0.5; // 0 a 1
-        const musica = new Audio(encodeURI('01- belltree.mp3'));
-        musica.loop = true;
-        musica.preload = 'auto';
-        let musicaGain = null, musicaIniciada = false;
-        const webAudioOk = /^https?:$/.test(location.protocol);
-
-        // Con Web Audio el volumen también se controla en iPhone
-        function conectarMusica() {
-            if (musicaGain || !audioCtx || !webAudioOk) return;
-            try {
-                const origen = audioCtx.createMediaElementSource(musica);
-                musicaGain = audioCtx.createGain();
-                musicaGain.gain.value = 0;
-                origen.connect(musicaGain);
-                musicaGain.connect(audioCtx.destination);
-            } catch (e) { musicaGain = null; }
-        }
-
-        function subirMusica() {
-            if (musicaGain) {
-                const t = audioCtx.currentTime;
-                musicaGain.gain.cancelScheduledValues(t);
-                musicaGain.gain.setValueAtTime(musicaGain.gain.value, t);
-                musicaGain.gain.linearRampToValueAtTime(VOLUMEN_MUSICA, t + 3); // entra de a poco
-            } else {
-                musica.volume = VOLUMEN_MUSICA;
-            }
-        }
-
-        function iniciarMusica() {
-            if (!sonidoActivo || !musica.paused) return;
-            iniciarAudio();
-            conectarMusica();
-            const p = musica.play();
-            if (p && p.then) p.then(function() { musicaIniciada = true; subirMusica(); }).catch(function() {});
-        }
-
-        iniciarMusica();
-        ['pointerup', 'touchend', 'click', 'keydown'].forEach(function(ev) {
-            window.addEventListener(ev, iniciarMusica, { passive: true });
-        });
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) musica.pause();
-            else if (musicaIniciada && sonidoActivo) iniciarMusica();
-        });
-
-        botonSonido.addEventListener('click', function() {
+botonSonido.addEventListener('click', function() {
             iniciarAudio();
             sonidoActivo = !sonidoActivo;
             botonSonido.textContent = sonidoActivo ? '🔊' : '🔇';
             botonSonido.classList.toggle('off', !sonidoActivo);
-            if (!sonidoActivo) { pulsado = false; terminarSostenido(); musica.pause(); }
-            else { iniciarMusica(); }
+            if (!sonidoActivo) { pulsado = false; terminarSostenido(); }
         });
     </script>
 </body>
