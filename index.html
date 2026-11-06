@@ -636,30 +636,7 @@
         /* Zoom al tocar un plato o bebida */
         .con-foto, .drink-item { cursor: pointer; }
 
-        /* Ícono de ampliar: marca las fotos que se pueden tocar (solo si la imagen existe) */
-        .con-foto .foto-slot::after,
-        .drink-wrap:has(.drink-img)::after {
-            content: '⤢';
-            position: absolute;
-            right: -2px;
-            bottom: 0;
-            width: 22px;
-            height: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(5, 10, 5, 0.88);
-            border: 1px solid rgba(212, 175, 55, 0.75);
-            color: var(--gold);
-            font-size: 0.85rem;
-            line-height: 1;
-            pointer-events: none;
-        }
         .drink-wrap { position: relative; flex: 0 0 auto; display: flex; }
-        /* mientras la foto está agrandada en el zoom, el ícono de la tarjeta se oculta */
-        .foto-slot:has(.item-foto[style*="hidden"])::after,
-        .drink-wrap:has(.drink-img[style*="hidden"])::after { opacity: 0; }
 
         /* Aviso "tocá una foto": aparece una sola vez y se va solo */
         #pista-tocar {
@@ -767,17 +744,6 @@
             text-transform: uppercase; color: var(--gold-light);
         }
         #zoom .zd-chev { font-size: 0.95rem; line-height: 1; color: var(--gold); }
-        #zoom #zoom-cerrar {
-            width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; border: 1.5px solid rgba(212, 175, 55, 0.6);
-            background: rgba(5, 10, 5, 0.6); color: var(--gold);
-            font-size: 1.1rem; line-height: 1; cursor: pointer;
-        }
-        #zoom #zoom-ayuda {
-            font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 1.5px;
-            text-transform: uppercase; color: rgba(244, 236, 216, 0.6);
-        }
 
         /* Flechas ▲ ▼ sobre el borde derecho, a la altura de la foto, con un empujoncito constante que invita a deslizar */
         #zoom .zoom-flecha {
@@ -930,14 +896,12 @@
         <button id="zoom-next" class="zoom-flecha" type="button" aria-label="Siguiente">▼</button>
         <div id="zoom-pie">
             <div id="zoom-deslizar"><span class="zd-chev zd-arr">▲</span><span>Deslizá para ver más</span><span class="zd-chev zd-aba">▼</span></div>
-            <button id="zoom-cerrar" type="button" aria-label="Cerrar">✕</button>
-            <div id="zoom-ayuda">Volvé atrás para cerrar</div>
         </div>
     </div>
 
     <div id="pista-deslizar" class="en-comidas" aria-hidden="true"><span class="ps-chev ps-izq">‹</span><span id="pista-texto">Deslizá para ver Bebidas</span><span class="ps-chev ps-der">›</span></div>
 
-    <div id="pista-tocar" aria-hidden="true"><span class="pt-icono">⤢</span><span>Tocá una foto para verla en grande</span></div>
+    <div id="pista-tocar" aria-hidden="true"><span>Tocá una foto para verla en grande</span></div>
 
     <button class="sound-toggle off" id="sound-toggle" type="button" aria-label="Activar o silenciar sonido" title="Sonido">🔇</button>
     <button class="arriba-btn" id="arriba-btn" type="button" aria-label="Volver arriba" title="Volver arriba">↑</button>
@@ -1553,7 +1517,7 @@
         const zoomNext = document.getElementById('zoom-next');
         const zoomContador = document.getElementById('zoom-contador');
         const zoomDeslizar = document.getElementById('zoom-deslizar');
-        const zoomExtras = ['zoom-cerrar', 'zoom-ayuda', 'zoom-prev', 'zoom-next', 'zoom-contador', 'zoom-deslizar'].map(id => document.getElementById(id));
+        const zoomExtras = ['zoom-prev', 'zoom-next', 'zoom-contador', 'zoom-deslizar'].map(id => document.getElementById(id));
 
         // Pista de deslizar: las primeras veces que se abre el zoom, la foto se mece un poco hacia los costados
         let zoomPista = [], pistasMostradas = 0;
@@ -1832,10 +1796,12 @@
             if (performance.now() < ignorarClickHasta) return; // el toque final de un deslizamiento no cierra
             if (zoomAnimando) return;
             if (zoomEl.classList.contains('abierto')) {
-                // Con el zoom abierto, tocar la pantalla ya no lo cierra: solo flechas y ✕
+                // Con el zoom abierto: las flechas cambian de plato; un toque en el fondo oscuro (fuera de la foto,
+                // los textos y los controles) lo cierra. También se cierra con "atrás" o Esc.
                 const flecha = e.target.closest('.zoom-flecha');
                 if (flecha) { navegarZoom(flecha.id === 'zoom-next' ? 1 : -1); return; }
-                if (e.target.closest('#zoom-cerrar')) pedirCierreZoom();
+                if (e.target.closest('#zoom-img, .zoom-nombre, .zoom-desc, .zoom-precio, #zoom-contador, #zoom-deslizar')) return;
+                pedirCierreZoom();
                 return;
             }
             const tarjeta = e.target.closest('.menu-item, .drink-item');
