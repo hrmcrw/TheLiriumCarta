@@ -46,7 +46,7 @@
             height: 120vh;  /* respaldo para navegadores viejos */
             height: 100lvh; /* alto fijo: no cambia cuando la barra del navegador se esconde */
             z-index: -3;
-            background-image: url('fondovertical.png');
+            background-image: url('fondovertical.webp');
             background-size: cover;
             background-position: center;
             filter: brightness(0.35) sepia(0.2) hue-rotate(-10deg);
@@ -299,6 +299,15 @@
             background: var(--gold-gradient);
             transform: scaleX(0);
             transition: transform 0.35s ease;
+        }
+        /* Separador fino entre las pestañas de comidas y las de bebidas */
+        .chip-sep {
+            flex: 0 0 auto;
+            align-self: center;
+            width: 1px;
+            height: 14px;
+            margin: 0 6px;
+            background: rgba(212, 175, 55, 0.5);
         }
         .chip:hover { color: var(--gold-light); }
         .chip.activo { color: var(--gold-light); }
@@ -572,8 +581,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 18px;
-            padding: 24px;
+            gap: 16px;
+            /* espacio abajo para el botón de cerrar y la pista de deslizar; arriba para el contador */
+            padding: 52px 24px calc(124px + env(safe-area-inset-bottom, 0px));
             cursor: pointer;
             text-align: center;
         }
@@ -587,8 +597,8 @@
         }
         #zoom > :not(#zoom-fondo) { position: relative; will-change: transform, opacity; }
         #zoom img {
-            width: min(86vw, 440px);
-            height: 52vh;
+            width: min(78vw, 440px);
+            height: 46vh;
             object-fit: contain;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
         }
@@ -608,28 +618,55 @@
         #zoom .zoom-precio .item-price { font-size: 1.3rem; }
         #zoom .zoom-precio .size { font-size: 0.95rem; }
         #zoom { touch-action: none; }
-        #zoom #zoom-cerrar, #zoom #zoom-prev, #zoom #zoom-next, #zoom #zoom-ayuda { position: absolute; }
+        #zoom #zoom-prev, #zoom #zoom-next, #zoom #zoom-contador, #zoom #zoom-pie { position: absolute; }
+
+        /* Contador arriba: "3 / 12" */
+        #zoom #zoom-contador {
+            top: calc(18px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
+            font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 3px;
+            color: var(--gold-light);
+        }
+
+        /* Pie del zoom: pista de deslizar, botón de cerrar y texto, todo centrado abajo */
+        #zoom #zoom-pie {
+            left: 0; right: 0;
+            bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        #zoom #zoom-deslizar {
+            display: flex; align-items: center; gap: 12px;
+            font-family: 'Cinzel', serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 1.8px;
+            text-transform: uppercase; color: var(--gold-light);
+        }
+        #zoom .zd-chev { font-size: 1.7rem; line-height: 0.8; color: var(--gold); }
         #zoom #zoom-cerrar {
-            top: 14px; right: 14px; width: 40px; height: 40px;
+            width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%; border: 1.5px solid rgba(212, 175, 55, 0.6);
             background: rgba(5, 10, 5, 0.6); color: var(--gold);
             font-size: 1.1rem; line-height: 1; cursor: pointer;
         }
-        #zoom .zoom-flecha {
-            top: 50%; margin-top: -24px; width: 38px; height: 48px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.4);
-            background: rgba(5, 10, 5, 0.45); color: var(--gold);
-            font-size: 2rem; line-height: 1; cursor: pointer;
-        }
-        #zoom #zoom-prev { left: 8px; }
-        #zoom #zoom-next { right: 8px; }
         #zoom #zoom-ayuda {
-            bottom: 18px; left: 0; right: 0;
             font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 1.5px;
             text-transform: uppercase; color: rgba(244, 236, 216, 0.6);
         }
+
+        /* Flechas laterales: más grandes y con un empujoncito constante que invita a deslizar */
+        #zoom .zoom-flecha {
+            top: 50%; margin-top: -30px; width: 40px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; border: 1.5px solid rgba(212, 175, 55, 0.8);
+            background: rgba(5, 10, 5, 0.7); color: var(--gold-light);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            font-size: 2.4rem; line-height: 1; cursor: pointer;
+        }
+        #zoom #zoom-prev { left: 4px; }
+        #zoom #zoom-next { right: 4px; }
+
+        @keyframes empujarIzq { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-6px); } }
+        @keyframes empujarDer { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(6px); } }
+        #zoom #zoom-prev, #zoom .zd-izq { animation: empujarIzq 1.5s ease-in-out infinite; }
+        #zoom #zoom-next, #zoom .zd-der { animation: empujarDer 1.5s ease-in-out infinite; }
 
         /* Volver arriba */
         .arriba-btn {
@@ -653,6 +690,7 @@
             .section-title, .logo-image-container, .seccion-visible, .nav-btn:not(.active-btn) { animation: none; }
             .seccion-visible.desde-der, .seccion-visible.desde-izq { animation: none; }
             #magic-bg, .sparkle { display: none; }
+            #zoom #zoom-prev, #zoom #zoom-next, #zoom .zd-izq, #zoom .zd-der { animation: none; }
         }
 
         @media (max-width: 420px) {
@@ -676,19 +714,18 @@
         <!-- LOGOTIPO -->
         <header>
             <div class="logo-image-container">
-                <img src="logo.png" alt="The Lirium Craft Bar" class="logo-image">
+                <img src="logo.webp" alt="The Lirium Craft Bar" class="logo-image">
             </div>
         </header>
 
         <!-- NAVEGACIÓN FIJA -->
         <nav class="top-nav" aria-label="Carta">
-            <div class="chips" id="chips-comidas">
+            <div class="chips" id="chips">
                 <a class="chip" href="#para-picar">Para picar</a>
                 <a class="chip" href="#hamburguesas">Hamburguesas</a>
                 <a class="chip" href="#empanadas">Empanadas</a>
                 <a class="chip" href="#pizzas">Pizzas</a>
-            </div>
-            <div class="chips chips-2 oculto" id="chips-bebidas">
+                <span class="chip-sep" aria-hidden="true"></span>
                 <a class="chip" href="#con-alcohol">Con alcohol</a>
                 <a class="chip" href="#sin-alcohol">Sin alcohol</a>
             </div>
@@ -810,7 +847,7 @@
             <h2 class="section-title reveal" id="con-alcohol">Con alcohol</h2>
 
             <div class="drink-item reveal">
-                <img src="fernet.png" alt="Fernet" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="fernet.webp" alt="Fernet" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Fernet</span><span class="item-desc">Fernet, Coca-Cola y hielo.</span>
                 </div>
@@ -818,7 +855,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="gin.png" alt="Gin Tonic" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="gin.webp" alt="Gin Tonic" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Gin Tonic</span><span class="item-desc">Gin, agua tónica, hielo y fruta. <br><em>Podés elegirlo de naranja, limón, pomelo o frutos rojos.</em></span>
                 </div>
@@ -826,7 +863,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="malibu.png" alt="Malibú" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="malibu.webp" alt="Malibú" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Malibú</span><span class="item-desc">Malibú, jugo de naranja y hielo.</span>
                 </div>
@@ -834,7 +871,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="campari.png" alt="Campari" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="campari.webp" alt="Campari" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Campari</span><span class="item-desc">Campari, jugo de naranja y hielo.</span>
                 </div>
@@ -842,7 +879,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="cynar.png" alt="Cynar" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="cynar.webp" alt="Cynar" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Cynar</span><span class="item-desc">Cynar, gaseosa de pomelo, hielo y pomelo o limón.</span>
                 </div>
@@ -850,7 +887,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="gancia.png" alt="Gancia" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="gancia.webp" alt="Gancia" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Gancia</span><span class="item-desc">Gancia, Sprite, limón y hielo.</span>
                 </div>
@@ -858,7 +895,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="mojito.png" alt="Mojito" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="mojito.webp" alt="Mojito" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Mojito</span><span class="item-desc">Ron blanco, lima o limón, menta, azúcar, soda y hielo.</span>
                 </div>
@@ -866,7 +903,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="cuba.png" alt="Cuba Libre" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="cuba.webp" alt="Cuba Libre" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Cuba Libre</span><span class="item-desc">Ron, Coca-Cola, lima o limón y hielo.</span>
                 </div>
@@ -874,7 +911,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="aperol.png" alt="Aperol Spritz" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="aperol.webp" alt="Aperol Spritz" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Aperol Spritz</span><span class="item-desc">Aperol, espumante, soda, naranja y hielo.</span>
                 </div>
@@ -882,7 +919,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="negroni.png" alt="Negroni" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="negroni.webp" alt="Negroni" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Negroni</span><span class="item-desc">Gin, Campari, vermouth rosso, naranja y hielo.</span>
                 </div>
@@ -890,7 +927,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="vermouth.png" alt="Vermouth La Fuerza" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="vermouth.webp" alt="Vermouth La Fuerza" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Vermouth La Fuerza</span><span class="item-desc">La Fuerza Rojo, soda, hielo y naranja.</span>
                 </div>
@@ -898,7 +935,7 @@
             </div>
 
             <div class="drink-item reveal">
-                <img src="caipirinha.png" alt="Caipirinha" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
+                <img src="caipirinha.webp" alt="Caipirinha" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
                 <div class="drink-info">
                     <span class="item-name">Caipirinha</span><span class="item-desc">Cachaça, lima o limón, azúcar y hielo.</span>
                 </div>
@@ -943,13 +980,17 @@
         <div class="zoom-nombre" id="zoom-nombre"></div>
         <div class="zoom-desc" id="zoom-desc"></div>
         <div class="zoom-precio" id="zoom-precio"></div>
-        <button id="zoom-cerrar" type="button" aria-label="Cerrar">✕</button>
+        <div id="zoom-contador"></div>
         <button id="zoom-prev" class="zoom-flecha" type="button" aria-label="Anterior">‹</button>
         <button id="zoom-next" class="zoom-flecha" type="button" aria-label="Siguiente">›</button>
-        <div id="zoom-ayuda">Tocá para cerrar · Deslizá para ver más</div>
+        <div id="zoom-pie">
+            <div id="zoom-deslizar"><span class="zd-chev zd-izq">‹</span><span>Deslizá para ver más</span><span class="zd-chev zd-der">›</span></div>
+            <button id="zoom-cerrar" type="button" aria-label="Cerrar">✕</button>
+            <div id="zoom-ayuda">Tocá para cerrar</div>
+        </div>
     </div>
 
-    <button class="sound-toggle" id="sound-toggle" type="button" aria-label="Activar o silenciar sonido" title="Sonido">🔊</button>
+    <button class="sound-toggle off" id="sound-toggle" type="button" aria-label="Activar o silenciar sonido" title="Sonido">🔇</button>
     <button class="arriba-btn" id="arriba-btn" type="button" aria-label="Volver arriba" title="Volver arriba">↑</button>
 
     <script>
@@ -982,7 +1023,7 @@
         // =========================================
         // 2. CAMBIAR ENTRE PESTAÑAS
         // =========================================
-        function mostrarSeccion(seccion, boton) {
+        function mostrarSeccion(seccion, boton, sinScroll) {
             document.getElementById('seccion-comidas').className = 'seccion-oculta';
             document.getElementById('seccion-bebidas').className = 'seccion-oculta';
 
@@ -995,23 +1036,18 @@
             boton.classList.add('active-btn');
             boton.setAttribute('aria-selected', 'true');
 
-            // Las categorías rápidas solo tienen sentido en comidas
-            document.getElementById('chips-comidas').classList.toggle('oculto', seccion !== 'comidas');
-            // Y los de alcohol / sin alcohol solo en bebidas
-            document.getElementById('chips-bebidas').classList.toggle('oculto', seccion !== 'bebidas');
-
             medirBarraFija();
             programarChips();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (!sinScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // =========================================
         // FOTOS POR NOMBRE
         // Cada tarjeta busca una imagen cuyo nombre es el del plato/bebida:
-        // "Papas cheddar & panceta" -> papas-cheddar-y-panceta.png
+        // "Papas cheddar & panceta" -> papas-cheddar-y-panceta.webp
         // Si el archivo no existe, la tarjeta queda igual que antes.
         // =========================================
-        const EXTENSIONES_FOTO = ['png', 'jpg', 'jpeg', 'webp'];
+        const EXTENSIONES_FOTO = ['webp', 'png', 'jpg', 'jpeg'];
 
         function nombreDeArchivo(texto) {
             return texto
@@ -1120,7 +1156,7 @@
                 document.body.appendChild(anillo);
                 ondasActivas++;
                 const anim = anillo.animate(
-                    [{ transform: 'scale(0.05)', opacity: i ? 0.55 : 0.95 }, { transform: 'scale(' + escalaMax + ')', opacity: 0 }],
+                    [{ transform: 'scale(0.05)', opacity: i ? 0.14 : 0.25 }, { transform: 'scale(' + escalaMax + ')', opacity: 0 }],
                     { duration: 1300, delay: retraso, easing: 'cubic-bezier(0.2, 0.7, 0.3, 1)', fill: 'both' }
                 );
                 const quitar = function() { anillo.remove(); ondasActivas--; };
@@ -1144,7 +1180,7 @@
         // Mientras el dedo sigue apretado el arpegio se repite y el timbre se va modulando de a poco.
         // =========================================
         let audioCtx = null, notaBus = null, tonoFiltro = null, wetGain = null, dryGain = null;
-        let sonidoActivo = true, ultimaRaiz = -1, sesion = null, pulsado = false;
+        let sonidoActivo = false, ultimaRaiz = -1, sesion = null, pulsado = false; // arranca silenciado
         const DURACION_MINIMA = 0.5; // un toque corto igual completa el arpegio
         const botonSonido = document.getElementById('sound-toggle');
 
@@ -1408,7 +1444,22 @@
         let zoomBloqueado = false, zoomScrollY = 0;
         const zoomPrev = document.getElementById('zoom-prev');
         const zoomNext = document.getElementById('zoom-next');
-        const zoomExtras = ['zoom-cerrar', 'zoom-ayuda', 'zoom-prev', 'zoom-next'].map(id => document.getElementById(id));
+        const zoomContador = document.getElementById('zoom-contador');
+        const zoomDeslizar = document.getElementById('zoom-deslizar');
+        const zoomExtras = ['zoom-cerrar', 'zoom-ayuda', 'zoom-prev', 'zoom-next', 'zoom-contador', 'zoom-deslizar'].map(id => document.getElementById(id));
+
+        // Pista de deslizar: las primeras veces que se abre el zoom, la foto se mece un poco hacia los costados
+        let zoomPista = [], pistasMostradas = 0;
+        function cancelarPista() { zoomPista.forEach(a => a.cancel()); zoomPista = []; }
+        function mostrarPista() {
+            if (reducirMovimiento || pistasMostradas >= 2 || !zoomTarjeta || tarjetasZoom().length < 2) return;
+            pistasMostradas++;
+            const partes = [zoomImg].concat(zoomTextos.map(t => t.destino));
+            zoomPista = partes.map(e => e.animate(
+                [{ transform: 'none' }, { transform: 'translateX(-30px)', offset: 0.3 }, { transform: 'translateX(30px)', offset: 0.7 }, { transform: 'none' }],
+                { duration: 1200, delay: 500, easing: 'ease-in-out' }
+            ));
+        }
 
         function centroDe(r) { return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
 
@@ -1461,6 +1512,11 @@
             const lista = tarjetasZoom(), i = lista.indexOf(zoomTarjeta);
             zoomPrev.style.visibility = i > 0 ? 'visible' : 'hidden';
             zoomNext.style.visibility = i < lista.length - 1 ? 'visible' : 'hidden';
+            // contador y pista solo si hay más de un producto para recorrer
+            zoomContador.textContent = (i + 1) + ' / ' + lista.length;
+            const hayMas = lista.length > 1;
+            zoomContador.style.visibility = hayMas ? 'visible' : 'hidden';
+            zoomDeslizar.style.visibility = hayMas ? 'visible' : 'hidden';
         }
 
         // Si la tarjeta nueva quedó fuera de pantalla, se la trae a la vista (sin animar)
@@ -1479,6 +1535,7 @@
             const lista = tarjetasZoom();
             const nueva = lista[lista.indexOf(zoomTarjeta) + dir];
             if (!nueva) return;
+            cancelarPista();
             zoomAnimando = true;
             const vieja = zoomTarjeta;
             const mover = 70 * dir;
@@ -1573,12 +1630,13 @@
             zoomExtras.forEach(function(e) {
                 e.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 380, fill: 'backwards' });
             });
-            Promise.all(anims.map(a => a.finished)).catch(function() {}).then(function() { zoomAnimando = false; });
+            Promise.all(anims.map(a => a.finished)).catch(function() {}).then(function() { zoomAnimando = false; mostrarPista(); });
         }
 
         // CERRAR: 1) la foto vuelve a su lugar, 2) recién después baja la barra del logo y los botones
         function cerrarZoom() {
             if (!zoomEl.classList.contains('abierto') || zoomAnimando || !zoomTarjeta) return;
+            cancelarPista(); // si la foto se estaba meciendo, se frena antes de medir
             const tarjeta = zoomTarjeta;
             const foto = tarjeta.querySelector(SELECTOR_FOTO);
             const origenes = zoomTextos.map(t => tarjeta.querySelector(t.origen));
@@ -1687,9 +1745,14 @@
 
         let chipVisto = null;
         function actualizarChips() {
-            const grupo = document.querySelector('.chips:not(.oculto)');
-            if (grupo) {
-                const chips = Array.from(grupo.querySelectorAll('a.chip'));
+            const grupo = document.getElementById('chips');
+            const todos = Array.from(grupo.querySelectorAll('a.chip'));
+            // solo cuentan las categorías de la pestaña que está a la vista (las otras están ocultas)
+            const chips = todos.filter(function(c) {
+                const t = document.querySelector(c.getAttribute('href'));
+                return t && t.offsetParent !== null;
+            });
+            if (chips.length) {
                 const limite = document.getElementById('top-fixed').offsetHeight + 40;
                 let activo = chips[0];
                 chips.forEach(function(c) {
@@ -1698,7 +1761,7 @@
                 });
                 // al llegar al final de la página queda marcada la última
                 if (window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) activo = chips[chips.length - 1];
-                chips.forEach(c => c.classList.toggle('activo', c === activo));
+                todos.forEach(c => c.classList.toggle('activo', c === activo));
                 if (activo !== chipVisto) {
                     chipVisto = activo;
                     if (grupo.scrollWidth > grupo.clientWidth + 2) {
@@ -1708,6 +1771,25 @@
             }
             arribaBtn.classList.toggle('visible', window.scrollY > 500);
         }
+
+        // Tocar una categoría: si está en la otra pestaña, se cambia de pestaña y se va directo a ella
+        function topAbsoluto(el) { let y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; }
+        document.querySelectorAll('a.chip').forEach(function(chip) {
+            chip.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (zoomAnimando || zoomEl.classList.contains('abierto')) return;
+                const destino = document.querySelector(chip.getAttribute('href'));
+                if (!destino) return;
+                const seccion = destino.closest('#seccion-comidas, #seccion-bebidas').id.replace('seccion-', '');
+                const enComidas = document.getElementById('seccion-comidas').classList.contains('seccion-visible');
+                if ((seccion === 'comidas') !== enComidas) {
+                    mostrarSeccion(seccion, document.getElementById('tab-' + seccion), true);
+                    document.getElementById('seccion-' + seccion).classList.add(seccion === 'bebidas' ? 'desde-der' : 'desde-izq');
+                }
+                const alturaBarra = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-h')) || 230;
+                window.scrollTo({ top: Math.max(0, topAbsoluto(destino) - alturaBarra), behavior: 'smooth' });
+            });
+        });
 
         let chipsPendiente = false;
         function programarChips() {
@@ -1734,7 +1816,7 @@
             const t = e.touches[0];
             // se ignoran los bordes de la pantalla (gesto de "volver" del celular) y el zoom
             tabValido = e.touches.length === 1 && !zoomAnimando && !zoomEl.classList.contains('abierto') &&
-                !e.target.closest('#bottom-nav, #zoom') && t.clientX > 24 && t.clientX < window.innerWidth - 24;
+                !e.target.closest('#bottom-nav, #zoom, #chips') && t.clientX > 24 && t.clientX < window.innerWidth - 24;
             tabX = t.clientX; tabY = t.clientY; tabT = Date.now();
         }, { passive: true });
         document.addEventListener('touchend', function(e) {
