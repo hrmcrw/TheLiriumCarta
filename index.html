@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#050a05">
     <title>The Lirium - Carta</title>
+    <meta name="description" content="Carta de The Lirium Craft Bar: para picar, hamburguesas, empanadas, pizzas y tragos con y sin alcohol.">
+
+    <!-- Ícono de la pestaña y del celular (crear estos archivos en la misma carpeta: favicon.png 64x64 y apple-touch-icon.png 180x180) -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- Vista previa al compartir el link (WhatsApp, Instagram, Facebook, etc.)
+         Dirección de la carta: https://hrmcrw.github.io/TheLiriumCarta/
+         La imagen preview.jpg debe medir 1200x630 y estar en la misma carpeta. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="The Lirium Craft Bar">
+    <meta property="og:locale" content="es_AR">
+    <meta property="og:title" content="The Lirium Craft Bar - Carta">
+    <meta property="og:description" content="Mirá la carta: para picar, hamburguesas, empanadas, pizzas y tragos.">
+    <meta property="og:url" content="https://hrmcrw.github.io/TheLiriumCarta/">
+    <meta property="og:image" content="https://hrmcrw.github.io/TheLiriumCarta/preview.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- Velocidad: conexión anticipada a las fuentes y precarga del fondo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="fondovertical.webp" as="image" type="image/webp">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 
     <style>
@@ -155,9 +178,7 @@
             top: 0;
             z-index: 50;
             margin: -20px -20px 10px;
-            background: rgba(5, 10, 5, 0.92);
-            -webkit-backdrop-filter: blur(8px);
-            backdrop-filter: blur(8px);
+            background: rgba(5, 10, 5, 0.96);
             border-bottom: 2px solid var(--gold);
             box-shadow: 0 8px 24px -10px var(--gold-glow);
         }
@@ -224,9 +245,7 @@
             bottom: 0;
             z-index: 55;
             padding: 10px 20px calc(10px + env(safe-area-inset-bottom, 0px));
-            background: rgba(5, 10, 5, 0.94);
-            -webkit-backdrop-filter: blur(8px);
-            backdrop-filter: blur(8px);
+            background: rgba(5, 10, 5, 0.97);
             border-top: 2px solid var(--gold);
             box-shadow: 0 -8px 24px -10px var(--gold-glow);
         }
@@ -253,7 +272,9 @@
                 box-shadow: 0 0 16px rgba(212, 175, 55, 0.65);
             }
         }
-        .nav-btn:not(.active-btn) { animation: latido 2.6s ease-in-out infinite; }
+        /* Late solo 3 veces al abrir la carta; cuando la persona ya cambió de pestaña, no vuelve a latir */
+        .nav-btn:not(.active-btn) { animation: latido 2.6s ease-in-out 3; }
+        body.sin-latido .nav-btn { animation: none; }
 
         /* Categorías: índice de texto en una sola fila (secundario: los botones principales están abajo) */
         .chips {
@@ -668,6 +689,41 @@
         #zoom #zoom-prev, #zoom .zd-izq { animation: empujarIzq 1.5s ease-in-out infinite; }
         #zoom #zoom-next, #zoom .zd-der { animation: empujarDer 1.5s ease-in-out infinite; }
 
+        /* Pista: "Deslizá para ver Bebidas / Comidas". Aparece unos segundos y se va sola */
+        #pista-deslizar {
+            position: fixed;
+            left: 50%;
+            bottom: calc(var(--bottom-h, 72px) + 124px);
+            z-index: 54;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 18px;
+            border-radius: 999px;
+            background: rgba(5, 10, 5, 0.92);
+            border: 1.5px solid rgba(212, 175, 55, 0.75);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            color: var(--gold-light);
+            opacity: 0;
+            transform: translate(-50%, 12px);
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        #pista-deslizar.visible { opacity: 1; transform: translate(-50%, 0); }
+        #pista-deslizar .ps-chev { font-size: 1.5rem; line-height: 0.8; color: var(--gold); }
+        /* en Comidas se desliza hacia la izquierda; en Bebidas, hacia la derecha */
+        #pista-deslizar.en-comidas .ps-der, #pista-deslizar.en-bebidas .ps-izq { display: none; }
+        @keyframes pistaIzq { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-8px); } }
+        @keyframes pistaDer { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(8px); } }
+        #pista-deslizar.visible .ps-izq { animation: pistaIzq 1.1s ease-in-out infinite; }
+        #pista-deslizar.visible .ps-der { animation: pistaDer 1.1s ease-in-out infinite; }
+
         /* Volver arriba */
         .arriba-btn {
             position: fixed; right: 16px; bottom: calc(var(--bottom-h, 72px) + 66px); z-index: 60;
@@ -691,6 +747,7 @@
             .seccion-visible.desde-der, .seccion-visible.desde-izq { animation: none; }
             #magic-bg, .sparkle { display: none; }
             #zoom #zoom-prev, #zoom #zoom-next, #zoom .zd-izq, #zoom .zd-der { animation: none; }
+            #pista-deslizar.visible .ps-izq, #pista-deslizar.visible .ps-der { animation: none; }
         }
 
         @media (max-width: 420px) {
@@ -714,251 +771,20 @@
         <!-- LOGOTIPO -->
         <header>
             <div class="logo-image-container">
-                <img src="logo.webp" alt="The Lirium Craft Bar" class="logo-image">
+                <img src="logo.webp" alt="The Lirium Craft Bar" class="logo-image" fetchpriority="high" decoding="async">
             </div>
         </header>
 
         <!-- NAVEGACIÓN FIJA -->
         <nav class="top-nav" aria-label="Carta">
-            <div class="chips" id="chips">
-                <a class="chip" href="#para-picar">Para picar</a>
-                <a class="chip" href="#hamburguesas">Hamburguesas</a>
-                <a class="chip" href="#empanadas">Empanadas</a>
-                <a class="chip" href="#pizzas">Pizzas</a>
-                <span class="chip-sep" aria-hidden="true"></span>
-                <a class="chip" href="#con-alcohol">Con alcohol</a>
-                <a class="chip" href="#sin-alcohol">Sin alcohol</a>
-            </div>
+            <div class="chips" id="chips"></div>
         </nav>
         </div>
 
-        <!-- =========================================
-             SECCIÓN COMIDAS (VISIBLE POR DEFECTO)
-             ========================================= -->
-        <div id="seccion-comidas" class="seccion-visible">
-
-            <!-- PARA PICAR -->
-            <h2 class="section-title reveal" id="para-picar">Para picar</h2>
-
-            <div class="menu-item variantes reveal">
-                <div><span class="item-name">Papas fritas</span><span class="item-desc">Papas crocantes.</span></div>
-                <div class="item-prices">
-                    <div class="price-row"><span class="size">Chica</span><span class="item-price">$15.500</span></div>
-                    <div class="price-row"><span class="size">XXL</span><span class="item-price">$20.500</span></div>
-                </div>
-            </div>
-
-            <div class="menu-item variantes reveal" data-foto="papas-cheddar-y-panceta">
-                <div><span class="item-name">Papas cheddar, panceta &amp; verdeo</span></div>
-                <div class="item-prices">
-                    <div class="price-row"><span class="size">Chica</span><span class="item-price">$18.000</span></div>
-                    <div class="price-row"><span class="size">XXL</span><span class="item-price">$23.000</span></div>
-                </div>
-            </div>
-
-            <!-- HAMBURGUESAS -->
-            <h2 class="section-title reveal" id="hamburguesas">Hamburguesas</h2>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Simple</span><span class="item-desc">Un medallón de carne, tomate, lechuga y cheddar.</span></div>
-                <div class="item-price">$20.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Completa</span><span class="item-desc">Un medallón de carne, jamón, panceta, queso, huevo, lechuga y tomate.</span></div>
-                <div class="item-price">$22.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Bacon</span><span class="item-desc">Un medallón de carne, panceta, cheddar y cebolla caramelizada.</span></div>
-                <div class="item-price">$22.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Doble cheddar</span><span class="item-desc">Dos medallones de carne y cheddar.</span></div>
-                <div class="item-price">$22.000</div>
-            </div>
-
-            <p class="nota reveal">Todas nuestras hamburguesas acompañadas con papas.</p>
-
-            <!-- EMPANADAS -->
-            <h2 class="section-title reveal" id="empanadas">Empanadas</h2>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Carne</span><span class="item-desc">Carne braseada, cebolla y especias.</span></div>
-                <div class="item-price">$4.000 c/u</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Jamón y queso</span><span class="item-desc">Jamón, queso y un toque de orégano.</span></div>
-                <div class="item-price">$4.000 c/u</div>
-            </div>
-
-            <!-- PIZZAS -->
-            <h2 class="section-title reveal" id="pizzas">Pizzas</h2>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Muzzarella</span><span class="item-desc">Salsa de tomate, muzzarella, orégano y aceitunas.</span></div>
-                <div class="item-price">$26.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Jamón y muzzarella</span><span class="item-desc">Salsa de tomate, muzzarella, jamón y aceitunas.</span></div>
-                <div class="item-price">$27.500</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Especial con morrón</span><span class="item-desc">Salsa de tomate, muzzarella, jamón, morrón y aceitunas.</span></div>
-                <div class="item-price">$27.500</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Cuatro Quesos</span><span class="item-desc">Salsa de tomate, selección de cuatro quesos y aceitunas.</span></div>
-                <div class="item-price">$29.500</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Fugazzetta</span><span class="item-desc">Salsa de tomate, muzzarella, cebolla, orégano y aceitunas.</span></div>
-                <div class="item-price">$27.500</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Rúcula y jamón crudo</span><span class="item-desc">Salsa de tomate, muzzarella, rúcula fresca, jamón crudo, parmesano y aceitunas.</span></div>
-                <div class="item-price">$30.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Napolitana</span><span class="item-desc">Salsa de tomate, muzzarella, tomate, ajo, orégano y aceitunas.</span></div>
-                <div class="item-price">$27.500</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Panceta</span><span class="item-desc">Salsa de tomate, muzzarella, panceta, aceitunas y orégano.</span></div>
-                <div class="item-price">$27.500</div>
-            </div>
-
-            <p class="nota reveal">“El buen sabor también es un viaje.”</p>
-        </div>
-
-        <!-- =========================================
-             SECCIÓN BEBIDAS (OCULTA POR DEFECTO)
-             ========================================= -->
-        <div id="seccion-bebidas" class="seccion-oculta">
-            <h2 class="section-title reveal" id="con-alcohol">Con alcohol</h2>
-
-            <div class="drink-item reveal">
-                <img src="fernet.webp" alt="Fernet" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Fernet</span><span class="item-desc">Fernet, Coca-Cola y hielo.</span>
-                </div>
-                <span class="item-price">$12.000</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="gin.webp" alt="Gin Tonic" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Gin Tonic</span><span class="item-desc">Gin, agua tónica, hielo y fruta. <br><em>Podés elegirlo de naranja, limón, pomelo o frutos rojos.</em></span>
-                </div>
-                <span class="item-price">$12.000</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="malibu.webp" alt="Malibú" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Malibú</span><span class="item-desc">Malibú, jugo de naranja y hielo.</span>
-                </div>
-                <span class="item-price">$12.000</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="campari.webp" alt="Campari" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Campari</span><span class="item-desc">Campari, jugo de naranja y hielo.</span>
-                </div>
-                <span class="item-price">$12.000</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="cynar.webp" alt="Cynar" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Cynar</span><span class="item-desc">Cynar, gaseosa de pomelo, hielo y pomelo o limón.</span>
-                </div>
-                <span class="item-price">$12.000</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="gancia.webp" alt="Gancia" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Gancia</span><span class="item-desc">Gancia, Sprite, limón y hielo.</span>
-                </div>
-                <span class="item-price">$10.000</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="mojito.webp" alt="Mojito" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Mojito</span><span class="item-desc">Ron blanco, lima o limón, menta, azúcar, soda y hielo.</span>
-                </div>
-                <span class="item-price">$14.000</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="cuba.webp" alt="Cuba Libre" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Cuba Libre</span><span class="item-desc">Ron, Coca-Cola, lima o limón y hielo.</span>
-                </div>
-                <span class="item-price">$12.000</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="aperol.webp" alt="Aperol Spritz" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Aperol Spritz</span><span class="item-desc">Aperol, espumante, soda, naranja y hielo.</span>
-                </div>
-                <span class="item-price">$15.000</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="negroni.webp" alt="Negroni" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Negroni</span><span class="item-desc">Gin, Campari, vermouth rosso, naranja y hielo.</span>
-                </div>
-                <span class="item-price">$14.500</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="vermouth.webp" alt="Vermouth La Fuerza" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Vermouth La Fuerza</span><span class="item-desc">La Fuerza Rojo, soda, hielo y naranja.</span>
-                </div>
-                <span class="item-price">$10.500</span>
-            </div>
-
-            <div class="drink-item reveal">
-                <img src="caipirinha.webp" alt="Caipirinha" class="drink-img" width="96" height="120" loading="lazy" decoding="async">
-                <div class="drink-info">
-                    <span class="item-name">Caipirinha</span><span class="item-desc">Cachaça, lima o limón, azúcar y hielo.</span>
-                </div>
-                <span class="item-price">$14.000</span>
-            </div>
-
-            <h2 class="section-title reveal" id="sin-alcohol">Sin alcohol</h2>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Agua con y sin gas</span><span class="item-desc">500 ml</span></div>
-                <div class="item-price">$3.500</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Agua saborizada</span><span class="item-desc">500 ml</span></div>
-                <div class="item-price">$4.000</div>
-            </div>
-
-            <div class="menu-item reveal">
-                <div><span class="item-name">Coca / Fanta / Sprite</span><span class="item-desc">500 ml</span></div>
-                <div class="item-price">$4.500</div>
-            </div>
-        </div>
+        <!-- La carta se arma desde la lista CARTA que está al comienzo del <script>.
+             Ahí se cambian precios, descripciones y platos. -->
+        <div id="seccion-comidas" class="seccion-visible"></div>
+        <div id="seccion-bebidas" class="seccion-oculta"></div>
 
         <footer class="reveal">
             <p class="footer-seguinos">Seguinos en</p>
@@ -990,11 +816,113 @@
         </div>
     </div>
 
+    <div id="pista-deslizar" class="en-comidas" aria-hidden="true"><span class="ps-chev ps-izq">‹</span><span id="pista-texto">Deslizá para ver Bebidas</span><span class="ps-chev ps-der">›</span></div>
+
     <button class="sound-toggle off" id="sound-toggle" type="button" aria-label="Activar o silenciar sonido" title="Sonido">🔇</button>
     <button class="arriba-btn" id="arriba-btn" type="button" aria-label="Volver arriba" title="Volver arriba">↑</button>
 
     <script>
         const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // =========================================================================
+        // LA CARTA: ACÁ SE CAMBIAN PRECIOS, DESCRIPCIONES Y PLATOS
+        //
+        //  - Cambiar un precio:    modificar el número (sin puntos ni $): precio: 20000
+        //  - Agregar un plato:     copiar una línea { nombre: ... } y pegarla donde corresponda
+        //  - Quitar un plato:      borrar su línea
+        //  - Un plato con dos tamaños usa  tamanos: [['Chica', 15500], ['XXL', 20500]]
+        //  - La foto de cada plato se busca sola por su nombre (ej: panceta.webp,
+        //    rucula-y-jamon-crudo.webp). Si el archivo tiene otro nombre, agregar  foto: 'nombre-del-archivo'
+        //  - Las bebidas con alcohol llevan  imagen: 'archivo'  (sin la extensión .webp)
+        // =========================================================================
+        const CARTA = {
+            comidas: [
+                { id: 'para-picar', titulo: 'Para picar', items: [
+                    { nombre: 'Papas fritas', desc: 'Papas crocantes.', tamanos: [['Chica', 15500], ['XXL', 20500]] },
+                    { nombre: 'Papas cheddar, panceta & verdeo', foto: 'papas-cheddar-y-panceta', tamanos: [['Chica', 18000], ['XXL', 23000]] }
+                ]},
+                { id: 'hamburguesas', titulo: 'Hamburguesas', nota: 'Todas nuestras hamburguesas acompañadas con papas.', items: [
+                    { nombre: 'Simple', desc: 'Un medallón de carne, tomate, lechuga y cheddar.', precio: 20000 },
+                    { nombre: 'Completa', desc: 'Un medallón de carne, jamón, panceta, queso, huevo, lechuga y tomate.', precio: 22000 },
+                    { nombre: 'Bacon', desc: 'Un medallón de carne, panceta, cheddar y cebolla caramelizada.', precio: 22000 },
+                    { nombre: 'Doble cheddar', desc: 'Dos medallones de carne y cheddar.', precio: 22000 }
+                ]},
+                { id: 'empanadas', titulo: 'Empanadas', items: [
+                    { nombre: 'Carne', desc: 'Carne braseada, cebolla y especias.', precio: 4000, unidad: 'c/u' },
+                    { nombre: 'Jamón y queso', desc: 'Jamón, queso y un toque de orégano.', precio: 4000, unidad: 'c/u' }
+                ]},
+                { id: 'pizzas', titulo: 'Pizzas', nota: '“El buen sabor también es un viaje.”', items: [
+                    { nombre: 'Muzzarella', desc: 'Salsa de tomate, muzzarella, orégano y aceitunas.', precio: 26000 },
+                    { nombre: 'Jamón y muzzarella', desc: 'Salsa de tomate, muzzarella, jamón y aceitunas.', precio: 27500 },
+                    { nombre: 'Especial con morrón', desc: 'Salsa de tomate, muzzarella, jamón, morrón y aceitunas.', precio: 27500 },
+                    { nombre: 'Cuatro Quesos', desc: 'Salsa de tomate, selección de cuatro quesos y aceitunas.', precio: 29500 },
+                    { nombre: 'Fugazzetta', desc: 'Salsa de tomate, muzzarella, cebolla, orégano y aceitunas.', precio: 27500 },
+                    { nombre: 'Rúcula y jamón crudo', desc: 'Salsa de tomate, muzzarella, rúcula fresca, jamón crudo, parmesano y aceitunas.', precio: 30000 },
+                    { nombre: 'Napolitana', desc: 'Salsa de tomate, muzzarella, tomate, ajo, orégano y aceitunas.', precio: 27500 },
+                    { nombre: 'Panceta', desc: 'Salsa de tomate, muzzarella, panceta, aceitunas y orégano.', precio: 27500 }
+                ]}
+            ],
+            bebidas: [
+                { id: 'con-alcohol', titulo: 'Con alcohol', tragos: true, items: [
+                    { nombre: 'Fernet', desc: 'Fernet, Coca-Cola y hielo.', precio: 12000, imagen: 'fernet' },
+                    { nombre: 'Gin Tonic', desc: 'Gin, agua tónica, hielo y fruta. <br><em>Podés elegirlo de naranja, limón, pomelo o frutos rojos.</em>', precio: 12000, imagen: 'gin' },
+                    { nombre: 'Malibú', desc: 'Malibú, jugo de naranja y hielo.', precio: 12000, imagen: 'malibu' },
+                    { nombre: 'Campari', desc: 'Campari, jugo de naranja y hielo.', precio: 12000, imagen: 'campari' },
+                    { nombre: 'Cynar', desc: 'Cynar, gaseosa de pomelo, hielo y pomelo o limón.', precio: 12000, imagen: 'cynar' },
+                    { nombre: 'Gancia', desc: 'Gancia, Sprite, limón y hielo.', precio: 10000, imagen: 'gancia' },
+                    { nombre: 'Mojito', desc: 'Ron blanco, lima o limón, menta, azúcar, soda y hielo.', precio: 14000, imagen: 'mojito' },
+                    { nombre: 'Cuba Libre', desc: 'Ron, Coca-Cola, lima o limón y hielo.', precio: 12000, imagen: 'cuba' },
+                    { nombre: 'Aperol Spritz', desc: 'Aperol, espumante, soda, naranja y hielo.', precio: 15000, imagen: 'aperol' },
+                    { nombre: 'Negroni', desc: 'Gin, Campari, vermouth rosso, naranja y hielo.', precio: 14500, imagen: 'negroni' },
+                    { nombre: 'Vermouth La Fuerza', desc: 'La Fuerza Rojo, soda, hielo y naranja.', precio: 10500, imagen: 'vermouth' },
+                    { nombre: 'Caipirinha', desc: 'Cachaça, lima o limón, azúcar y hielo.', precio: 14000, imagen: 'caipirinha' }
+                ]},
+                { id: 'sin-alcohol', titulo: 'Sin alcohol', items: [
+                    { nombre: 'Agua con y sin gas', desc: '500 ml', precio: 3500 },
+                    { nombre: 'Agua saborizada', desc: '500 ml', precio: 4000 },
+                    { nombre: 'Coca / Fanta / Sprite', desc: '500 ml', precio: 4500 }
+                ]}
+            ]
+        };
+
+        // --- A partir de acá se arma la página con la lista de arriba (no hace falta tocarlo) ---
+        function esc(t) {
+            return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function precio(n) { return '$' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+
+        function htmlItem(it, esTrago) {
+            const nombre = '<span class="item-name">' + esc(it.nombre) + '</span>';
+            const desc = it.desc ? '<span class="item-desc">' + it.desc + '</span>' : '';
+            if (esTrago) {
+                return '<div class="drink-item reveal">' +
+                    '<img src="' + it.imagen + '.webp" alt="' + esc(it.nombre) + '" class="drink-img" width="96" height="120" loading="lazy" decoding="async">' +
+                    '<div class="drink-info">' + nombre + desc + '</div>' +
+                    '<span class="item-price">' + precio(it.precio) + '</span></div>';
+            }
+            const precios = it.tamanos
+                ? '<div class="item-prices">' + it.tamanos.map(function(t) {
+                    return '<div class="price-row"><span class="size">' + esc(t[0]) + '</span><span class="item-price">' + precio(t[1]) + '</span></div>';
+                }).join('') + '</div>'
+                : '<div class="item-price">' + precio(it.precio) + (it.unidad ? ' ' + esc(it.unidad) : '') + '</div>';
+            return '<div class="menu-item' + (it.tamanos ? ' variantes' : '') + ' reveal"' +
+                (it.foto ? ' data-foto="' + esc(it.foto) + '"' : '') + '>' +
+                '<div>' + nombre + desc + '</div>' + precios + '</div>';
+        }
+
+        function htmlCategoria(c) {
+            return '<h2 class="section-title reveal" id="' + c.id + '">' + esc(c.titulo) + '</h2>' +
+                c.items.map(function(it) { return htmlItem(it, c.tragos); }).join('') +
+                (c.nota ? '<p class="nota reveal">' + esc(c.nota) + '</p>' : '');
+        }
+
+        document.getElementById('seccion-comidas').innerHTML = CARTA.comidas.map(htmlCategoria).join('');
+        document.getElementById('seccion-bebidas').innerHTML = CARTA.bebidas.map(htmlCategoria).join('');
+
+        // Las pestañas de categorías salen de la misma lista (comidas | bebidas)
+        function htmlChip(c) { return '<a class="chip" href="#' + c.id + '">' + esc(c.titulo) + '</a>'; }
+        document.getElementById('chips').innerHTML =
+            CARTA.comidas.map(htmlChip).join('') + '<span class="chip-sep" aria-hidden="true"></span>' + CARTA.bebidas.map(htmlChip).join('');
 
         function medirBarraFija() {
             const t = document.getElementById('top-fixed');
@@ -1036,6 +964,7 @@
             boton.classList.add('active-btn');
             boton.setAttribute('aria-selected', 'true');
 
+            document.body.classList.add('sin-latido'); // ya encontró las pestañas: el botón deja de latir
             medirBarraFija();
             programarChips();
             if (!sinScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1047,7 +976,9 @@
         // "Papas cheddar & panceta" -> papas-cheddar-y-panceta.webp
         // Si el archivo no existe, la tarjeta queda igual que antes.
         // =========================================
-        const EXTENSIONES_FOTO = ['webp', 'png', 'jpg', 'jpeg'];
+        // Una sola extensión = una sola consulta por plato (antes eran hasta cuatro).
+        // Si algún día se usa otro formato, agregarlo acá, por ejemplo ['webp', 'png'].
+        const EXTENSIONES_FOTO = ['webp'];
 
         function nombreDeArchivo(texto) {
             return texto
@@ -1077,6 +1008,7 @@
             probe.src = base + '.' + EXTENSIONES_FOTO[i];
         }
 
+        const busquedasDeFoto = [];
         document.querySelectorAll('.menu-item').forEach(function(tarjeta) {
             const el = tarjeta.querySelector('.item-name');
             if (!el) return;
@@ -1088,8 +1020,18 @@
             tarjeta.classList.add('con-espacio');
             tarjeta.insertBefore(slot, tarjeta.firstChild);
             // data-foto permite que el archivo tenga un nombre distinto al del plato
-            ponerFoto(tarjeta, tarjeta.dataset.foto || nombreDeArchivo(nombre), nombre, 0);
+            busquedasDeFoto.push(function() { ponerFoto(tarjeta, tarjeta.dataset.foto || nombreDeArchivo(nombre), nombre, 0); });
         });
+
+        // Las fotos se buscan recién cuando terminó de cargar lo principal (logo, fondo, textos),
+        // para que no le compitan por la conexión
+        function lanzarBusquedasDeFoto() { busquedasDeFoto.forEach(function(buscar) { buscar(); }); }
+        function agendarBusquedasDeFoto() {
+            if (window.requestIdleCallback) requestIdleCallback(lanzarBusquedasDeFoto, { timeout: 1500 });
+            else setTimeout(lanzarBusquedasDeFoto, 300);
+        }
+        if (document.readyState === 'complete') agendarBusquedasDeFoto();
+        else window.addEventListener('load', agendarBusquedasDeFoto);
 
         // =========================================
         // 3. PARTÍCULAS (menos cantidad = más fluido)
@@ -1392,6 +1334,7 @@
 
         function alPulsar(e) {
             if (e.target.closest && e.target.closest('#sound-toggle')) return;
+            if (!sonidoActivo) return; // silenciado: no se prepara el audio (ahorra batería y carga)
             pulsado = true;
             iniciarAudio();
             if (audioCtx && audioCtx.state === 'running') {
