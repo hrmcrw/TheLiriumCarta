@@ -895,7 +895,28 @@
         const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         // =========================================================================
-        // LA CARTA: ACÁ SE CAMBIAN PRECIOS, DESCRIPCIONES Y PLATOS
+        // PLANILLA DE GOOGLE (opcional): precios, descripciones y platos se manejan desde ahí.
+        //
+        //  1. En la planilla: Archivo > Compartir > Publicar en la Web > elegir la hoja "Carta" y
+        //     el formato "Valores separados por comas (.csv)" > Publicar.
+        //  2. Pegar entre las comillas el link que da Google:  const URL_PLANILLA = 'https://...';
+        //  3. Dejándolo vacío ('') la carta usa la lista de más abajo (CARTA_BASE), que además
+        //     queda como respaldo si la planilla no se puede leer.
+        //
+        // Los cambios hechos en la planilla tardan unos minutos en llegar a la carta.
+        // =========================================================================
+        const URL_PLANILLA = '';
+        const CLAVE_CACHE_CARTA = 'lirium-carta-v1';
+        function leerCacheCarta() {
+            try {
+                const c = JSON.parse(localStorage.getItem(CLAVE_CACHE_CARTA));
+                return c && c.comidas && c.bebidas ? c : null;
+            } catch (e) { return null; }
+        }
+
+        // =========================================================================
+        // CARTA DE RESPALDO: se usa si URL_PLANILLA está vacía o si la planilla no se puede leer.
+        // Con la planilla conectada, los precios y platos se cambian desde ahí, no acá.
         //
         //  - Cambiar un precio:    modificar el número (sin puntos ni $): precio: 20000
         //  - Agregar un plato:     copiar una línea { nombre: ... } y pegarla donde corresponda
@@ -906,7 +927,7 @@
         //    Si un plato NO tiene foto, agregar  foto: false  para no buscarla (evita consultas fallidas).
         //  - Las bebidas con alcohol llevan  imagen: 'archivo'  (sin la extensión .webp)
         // =========================================================================
-        const CARTA = {
+        const CARTA_BASE = {
             comidas: [
                 { id: 'para-picar', titulo: 'Para picar', items: [
                     { nombre: 'Papas fritas', desc: 'Papas crocantes.', tamanos: [['Chica', 15500], ['XXL', 20500]] },
@@ -956,11 +977,17 @@
             ]
         };
 
+        // La carta que se muestra: la última leída de la planilla (guardada en el celular) o la de respaldo
+        let CARTA = (URL_PLANILLA && leerCacheCarta()) || CARTA_BASE;
+
         // --- A partir de acá se arma la página con la lista de arriba (no hace falta tocarlo) ---
         function esc(t) {
             return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
-        function precio(n) { return '$' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+        function precio(n) {
+            if (n == null || isNaN(n)) return ''; // sin precio cargado: no se muestra nada
+            return '$' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
 
         // Si falta la imagen de un trago, se reemplaza por el mismo espacio reservado que usan las comidas
         function fotoTragoFaltante(img) {
@@ -975,7 +1002,7 @@
             const desc = it.desc ? '<span class="item-desc">' + it.desc + '</span>' : '';
             if (esTrago) {
                 return '<div class="drink-item reveal">' +
-                    '<span class="drink-wrap"><img src="' + it.imagen + '.webp" alt="' + esc(it.nombre) + '" class="drink-img" width="96" height="120" loading="lazy" decoding="async" onerror="fotoTragoFaltante(this)"></span>' +
+                    '<span class="drink-wrap"><img src="' + (it.imagen || nombreDeArchivo(it.nombre)) + '.webp" alt="' + esc(it.nombre) + '" class="drink-img" width="96" height="120" loading="lazy" decoding="async" onerror="fotoTragoFaltante(this)"></span>' +
                     '<div class="drink-info">' + nombre + desc + '</div>' +
                     '<span class="item-price">' + precio(it.precio) + '</span></div>';
             }
@@ -995,13 +1022,17 @@
                 (c.nota ? '<p class="nota reveal">' + esc(c.nota) + '</p>' : '');
         }
 
-        document.getElementById('seccion-comidas').innerHTML = CARTA.comidas.map(htmlCategoria).join('');
-        document.getElementById('seccion-bebidas').innerHTML = CARTA.bebidas.map(htmlCategoria).join('');
-
         // Las pestañas de categorías salen de la misma lista (comidas | bebidas)
         function htmlChip(c) { return '<a class="chip" href="#' + c.id + '">' + esc(c.titulo) + '</a>'; }
-        document.getElementById('chips').innerHTML =
-            CARTA.comidas.map(htmlChip).join('') + '<span class="chip-sep" aria-hidden="true"></span>' + CARTA.bebidas.map(htmlChip).join('');
+
+        // Arma las dos secciones y las pestañas de categorías con la carta actual
+        function dibujarCarta() {
+            document.getElementById('seccion-comidas').innerHTML = CARTA.comidas.map(htmlCategoria).join('');
+            document.getElementById('seccion-bebidas').innerHTML = CARTA.bebidas.map(htmlCategoria).join('');
+            document.getElementById('chips').innerHTML =
+                CARTA.comidas.map(htmlChip).join('') + '<span class="chip-sep" aria-hidden="true"></span>' + CARTA.bebidas.map(htmlChip).join('');
+        }
+        dibujarCarta();
 
         function medirBarraFija() {
             const t = document.getElementById('top-fixed');
@@ -1025,7 +1056,8 @@
             });
         }, { threshold: 0.05, rootMargin: "0px 0px -5% 0px" });
 
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        function observarReveal() { document.querySelectorAll('.reveal:not(.active)').forEach(el => observer.observe(el)); }
+        observarReveal();
 
         // =========================================
         // 2. CAMBIAR ENTRE PESTAÑAS
@@ -1088,6 +1120,8 @@
         }
 
         const busquedasDeFoto = [];
+        function prepararFotos() {
+        busquedasDeFoto.length = 0;
         document.querySelectorAll('.menu-item').forEach(function(tarjeta) {
             const el = tarjeta.querySelector('.item-name');
             if (!el) return;
@@ -1104,6 +1138,8 @@
             if (!archivo || archivo === 'no') return;
             busquedasDeFoto.push(function() { ponerFoto(tarjeta, archivo === '1' ? nombreDeArchivo(nombre) : archivo, nombre, 0); });
         });
+        }
+        prepararFotos();
 
         // Las fotos se buscan recién cuando terminó de cargar lo principal (logo, fondo, textos),
         // para que no le compitan por la conexión
@@ -1801,21 +1837,22 @@
 
         // Tocar una categoría: si está en la otra pestaña, se cambia de pestaña y se va directo a ella
         function topAbsoluto(el) { let y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; }
-        document.querySelectorAll('a.chip').forEach(function(chip) {
-            chip.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (zoomAnimando || zoomEl.classList.contains('abierto')) return;
-                const destino = document.querySelector(chip.getAttribute('href'));
-                if (!destino) return;
-                const seccion = destino.closest('#seccion-comidas, #seccion-bebidas').id.replace('seccion-', '');
-                const enComidas = document.getElementById('seccion-comidas').classList.contains('seccion-visible');
-                if ((seccion === 'comidas') !== enComidas) {
-                    mostrarSeccion(seccion, document.getElementById('tab-' + seccion), true);
-                    document.getElementById('seccion-' + seccion).classList.add(seccion === 'bebidas' ? 'desde-der' : 'desde-izq');
-                }
-                const alturaBarra = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-h')) || 230;
-                window.scrollTo({ top: Math.max(0, topAbsoluto(destino) - alturaBarra), behavior: 'smooth' });
-            });
+        // Un solo oyente sobre el contenedor: sigue funcionando si la carta se vuelve a dibujar
+        document.getElementById('chips').addEventListener('click', function(e) {
+            const chip = e.target.closest('a.chip');
+            if (!chip) return;
+            e.preventDefault();
+            if (zoomAnimando || zoomEl.classList.contains('abierto')) return;
+            const destino = document.querySelector(chip.getAttribute('href'));
+            if (!destino) return;
+            const seccion = destino.closest('#seccion-comidas, #seccion-bebidas').id.replace('seccion-', '');
+            const enComidas = document.getElementById('seccion-comidas').classList.contains('seccion-visible');
+            if ((seccion === 'comidas') !== enComidas) {
+                mostrarSeccion(seccion, document.getElementById('tab-' + seccion), true);
+                document.getElementById('seccion-' + seccion).classList.add(seccion === 'bebidas' ? 'desde-der' : 'desde-izq');
+            }
+            const alturaBarra = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-h')) || 230;
+            window.scrollTo({ top: Math.max(0, topAbsoluto(destino) - alturaBarra), behavior: 'smooth' });
         });
 
         let chipsPendiente = false;
@@ -1891,6 +1928,116 @@
         function agendarPistaTocar() { setTimeout(function() { intentarPistaTocar(0); }, 2500); }
         if (document.readyState === 'complete') agendarPistaTocar();
         else window.addEventListener('load', agendarPistaTocar);
+
+// =========================================
+        // PLANILLA DE GOOGLE: lee la carta publicada como CSV y actualiza la página si cambió
+        // Primera fila de la hoja (encabezados):
+        // pestana, categoria, nota_categoria, nombre, descripcion, aclaracion,
+        // precio, tamano_1, tamano_2, precio_2, unidad, imagen, foto, visible
+        // =========================================
+        function parsearCSV(texto) {
+            const filas = [];
+            let fila = [], campo = '', enComillas = false;
+            if (texto.charCodeAt(0) === 0xFEFF) texto = texto.slice(1);
+            for (let i = 0; i < texto.length; i++) {
+                const c = texto[i];
+                if (enComillas) {
+                    if (c === '"') {
+                        if (texto[i + 1] === '"') { campo += '"'; i++; } else enComillas = false;
+                    } else campo += c;
+                } else if (c === '"') enComillas = true;
+                else if (c === ',') { fila.push(campo); campo = ''; }
+                else if (c === '\n' || c === '\r') {
+                    if (c === '\r' && texto[i + 1] === '\n') i++;
+                    fila.push(campo); campo = ''; filas.push(fila); fila = [];
+                } else campo += c;
+            }
+            if (campo !== '' || fila.length) { fila.push(campo); filas.push(fila); }
+            return filas;
+        }
+
+        function claveColumna(t) {
+            return String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+                .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        }
+        // "$20.000", "20000" o "20.000,00" -> 20000 (los precios son enteros)
+        function numeroDe(t) {
+            const s = String(t == null ? '' : t).trim().replace(/[.,]\d{2}$/, '').replace(/\D/g, '');
+            return s ? parseInt(s, 10) : null;
+        }
+        function quitarExtension(t) { return String(t).trim().replace(/\.(webp|png|jpe?g)$/i, ''); }
+        const ES_NO = /^(no|n|0|false|oculto|agotado)$/i;
+
+        function cartaDesdeCSV(texto) {
+            const filas = parsearCSV(texto).filter(function(f) { return f.some(function(c) { return String(c).trim() !== ''; }); });
+            if (filas.length < 2) return null;
+            const cab = filas[0].map(claveColumna);
+            if (cab.indexOf('nombre') < 0) return null; // no es la hoja de la carta (por ejemplo, una página de acceso de Google)
+            const carta = { comidas: [], bebidas: [] };
+            const categorias = {}, ids = {};
+            filas.slice(1).forEach(function(f) {
+                const r = {};
+                cab.forEach(function(k, i) { r[k] = f[i] == null ? '' : String(f[i]).trim(); });
+                if (!r.nombre || ES_NO.test(r.visible || '')) return;
+                const pestana = /^b/i.test(r.pestana) ? 'bebidas' : 'comidas';
+                const titulo = r.categoria || 'Otros';
+                const clave = pestana + '|' + titulo.toLowerCase();
+                let cat = categorias[clave];
+                if (!cat) {
+                    let id = nombreDeArchivo(titulo) || 'categoria';
+                    while (ids[id]) id += pestana === 'bebidas' ? '-b' : '-c';
+                    ids[id] = true;
+                    cat = categorias[clave] = { id: id, titulo: titulo, items: [] };
+                    carta[pestana].push(cat);
+                }
+                if (r.nota_categoria && !cat.nota) cat.nota = r.nota_categoria;
+                const item = { nombre: r.nombre };
+                // la descripción se escapa siempre; la aclaración va en cursiva en una segunda línea
+                const desc = esc(r.descripcion || '') + (r.aclaracion ? (r.descripcion ? '<br>' : '') + '<em>' + esc(r.aclaracion) + '</em>' : '');
+                if (desc) item.desc = desc;
+                if (r.tamano_1) {
+                    item.tamanos = [[r.tamano_1, numeroDe(r.precio)]];
+                    if (r.tamano_2) item.tamanos.push([r.tamano_2, numeroDe(r.precio_2)]);
+                } else item.precio = numeroDe(r.precio);
+                if (r.unidad) item.unidad = r.unidad;
+                if (r.imagen) { item.imagen = quitarExtension(r.imagen); cat.tragos = true; }
+                if (ES_NO.test(r.foto || '') && r.foto) item.foto = false;
+                else if (r.foto) item.foto = quitarExtension(r.foto);
+                cat.items.push(item);
+            });
+            if (!carta.comidas.length && !carta.bebidas.length) return null;
+            return carta;
+        }
+
+        // Vuelve a dibujar la carta cuando la planilla trae cambios (espera si hay una foto agrandada)
+        function repintarCarta() {
+            if (zoomAnimando || zoomEl.classList.contains('abierto')) { setTimeout(repintarCarta, 1000); return; }
+            dibujarCarta();
+            document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('active'); }); // sin parpadeo
+            prepararFotos();
+            lanzarBusquedasDeFoto();
+            chipVisto = null;
+            medirBarraFija();
+            programarChips();
+        }
+
+        async function cargarDesdePlanilla() {
+            if (!URL_PLANILLA) return;
+            try {
+                const ctl = new AbortController();
+                const corte = setTimeout(function() { ctl.abort(); }, 10000);
+                const resp = await fetch(URL_PLANILLA, { cache: 'no-store', signal: ctl.signal });
+                clearTimeout(corte);
+                if (!resp.ok) return;
+                const nueva = cartaDesdeCSV(await resp.text());
+                if (!nueva) return; // si la planilla viene vacía o rota, queda la carta que ya se ve
+                const igual = JSON.stringify(nueva) === JSON.stringify(CARTA);
+                try { localStorage.setItem(CLAVE_CACHE_CARTA, JSON.stringify(nueva)); } catch (e) {}
+                if (!igual) { CARTA = nueva; repintarCarta(); }
+            } catch (e) { /* sin conexión o planilla no disponible: queda la carta que ya se ve */ }
+        }
+        if (document.readyState === 'complete') cargarDesdePlanilla();
+        else window.addEventListener('load', cargarDesdePlanilla);
 
 botonSonido.addEventListener('click', function() {
             iniciarAudio();
