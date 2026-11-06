@@ -901,9 +901,9 @@
         //  - Agregar un plato:     copiar una línea { nombre: ... } y pegarla donde corresponda
         //  - Quitar un plato:      borrar su línea
         //  - Un plato con dos tamaños usa  tamanos: [['Chica', 15500], ['XXL', 20500]]
-        //  - Los platos con foto llevan  foto: true  y la imagen se busca por su nombre
-        //    (ej: panceta.webp, rucula-y-jamon-crudo.webp). Si el archivo tiene otro nombre,
-        //    usar  foto: 'nombre-del-archivo'. Sin la marca  foto, no se busca ninguna imagen.
+        //  - La foto de cada plato se busca sola por su nombre (ej: panceta.webp,
+        //    rucula-y-jamon-crudo.webp). Si el archivo tiene otro nombre, agregar  foto: 'nombre-del-archivo'.
+        //    Si un plato NO tiene foto, agregar  foto: false  para no buscarla (evita consultas fallidas).
         //  - Las bebidas con alcohol llevan  imagen: 'archivo'  (sin la extensión .webp)
         // =========================================================================
         const CARTA = {
@@ -928,9 +928,9 @@
                     { nombre: 'Especial con morrón', desc: 'Salsa de tomate, muzzarella, jamón, morrón y aceitunas.', precio: 27500 },
                     { nombre: 'Cuatro Quesos', desc: 'Salsa de tomate, selección de cuatro quesos y aceitunas.', precio: 29500 },
                     { nombre: 'Fugazzetta', desc: 'Salsa de tomate, muzzarella, cebolla, orégano y aceitunas.', precio: 27500 },
-                    { nombre: 'Rúcula y jamón crudo', foto: true, desc: 'Salsa de tomate, muzzarella, rúcula fresca, jamón crudo, parmesano y aceitunas.', precio: 30000 },
+                    { nombre: 'Rúcula y jamón crudo', desc: 'Salsa de tomate, muzzarella, rúcula fresca, jamón crudo, parmesano y aceitunas.', precio: 30000 },
                     { nombre: 'Napolitana', desc: 'Salsa de tomate, muzzarella, tomate, ajo, orégano y aceitunas.', precio: 27500 },
-                    { nombre: 'Panceta', foto: true, desc: 'Salsa de tomate, muzzarella, panceta, aceitunas y orégano.', precio: 27500 }
+                    { nombre: 'Panceta', desc: 'Salsa de tomate, muzzarella, panceta, aceitunas y orégano.', precio: 27500 }
                 ]}
             ],
             bebidas: [
@@ -985,7 +985,7 @@
                 }).join('') + '</div>'
                 : '<div class="item-price">' + precio(it.precio) + (it.unidad ? ' ' + esc(it.unidad) : '') + '</div>';
             return '<div class="menu-item' + (it.tamanos ? ' variantes' : '') + ' reveal"' +
-                (it.foto ? ' data-foto="' + (it.foto === true ? '1' : esc(it.foto)) + '"' : '') + '>' +
+                ' data-foto="' + (it.foto === false ? 'no' : (typeof it.foto === 'string' ? esc(it.foto) : '1')) + '">' +
                 '<div>' + nombre + desc + '</div>' + precios + '</div>';
         }
 
@@ -1098,10 +1098,10 @@
             slot.setAttribute('aria-hidden', 'true');
             tarjeta.classList.add('con-espacio');
             tarjeta.insertBefore(slot, tarjeta.firstChild);
-            // Solo se busca la foto de los platos marcados con foto en CARTA (sin consultas fallidas).
-            // data-foto trae el nombre del archivo, o '1' si coincide con el del plato.
+            // Se busca la foto de todos los platos, salvo los marcados con foto: false en CARTA.
+            // data-foto trae el nombre del archivo, '1' si coincide con el del plato, o 'no' si no tiene.
             const archivo = tarjeta.dataset.foto;
-            if (!archivo) return;
+            if (!archivo || archivo === 'no') return;
             busquedasDeFoto.push(function() { ponerFoto(tarjeta, archivo === '1' ? nombreDeArchivo(nombre) : archivo, nombre, 0); });
         });
 
@@ -1859,10 +1859,10 @@
         }, { passive: true });
 
 // =========================================
-        // AVISO "TOCÁ UNA FOTO": sale una sola vez, unos segundos, cuando ya hay fotos a la vista
+        // AVISO "TOCÁ UNA FOTO": sale unos segundos en cada visita, hasta que la persona abre un zoom por primera vez
         // =========================================
         const pistaTocar = document.getElementById('pista-tocar');
-        const CLAVE_PISTA_TOCAR = 'lirium-pista-tocar';
+        const CLAVE_PISTA_TOCAR = 'lirium-pista-tocar-v2';
         let pistaTocarTimer = null;
 
         function pistaTocarYaVista() {
@@ -1883,7 +1883,6 @@
             if (pistaTocarYaVista()) return;
             if (hayFotoVisible()) {
                 pistaTocar.classList.add('visible');
-                recordarPistaTocar();
                 pistaTocarTimer = setTimeout(ocultarPistaTocar, 6000);
             } else if (n < 4) {
                 setTimeout(function() { intentarPistaTocar(n + 1); }, 1500);
