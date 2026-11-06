@@ -726,7 +726,7 @@
             font-family: 'Cinzel', serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 1.8px;
             text-transform: uppercase; color: var(--gold-light);
         }
-        #zoom .zd-chev { font-size: 1.7rem; line-height: 0.8; color: var(--gold); }
+        #zoom .zd-chev { font-size: 0.95rem; line-height: 1; color: var(--gold); }
         #zoom #zoom-cerrar {
             width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
@@ -739,22 +739,22 @@
             text-transform: uppercase; color: rgba(244, 236, 216, 0.6);
         }
 
-        /* Flechas laterales: más grandes y con un empujoncito constante que invita a deslizar */
+        /* Flechas ▲ ▼ sobre el borde derecho, a la altura de la foto, con un empujoncito constante que invita a deslizar */
         #zoom .zoom-flecha {
-            top: 50%; margin-top: -30px; width: 40px; height: 60px;
+            right: 2px; top: 50%; width: 36px; height: 44px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 12px; border: 1.5px solid rgba(212, 175, 55, 0.8);
             background: rgba(5, 10, 5, 0.7); color: var(--gold-light);
             box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-            font-size: 2.4rem; line-height: 1; cursor: pointer;
+            font-size: 1rem; line-height: 1; cursor: pointer;
         }
-        #zoom #zoom-prev { left: 4px; }
-        #zoom #zoom-next { right: 4px; }
+        #zoom #zoom-prev { margin-top: -52px; }
+        #zoom #zoom-next { margin-top: 8px; }
 
-        @keyframes empujarIzq { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-6px); } }
-        @keyframes empujarDer { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(6px); } }
-        #zoom #zoom-prev, #zoom .zd-izq { animation: empujarIzq 1.5s ease-in-out infinite; }
-        #zoom #zoom-next, #zoom .zd-der { animation: empujarDer 1.5s ease-in-out infinite; }
+        @keyframes empujarArr { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        @keyframes empujarAba { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+        #zoom #zoom-prev, #zoom .zd-arr { animation: empujarArr 1.5s ease-in-out infinite; }
+        #zoom #zoom-next, #zoom .zd-aba { animation: empujarAba 1.5s ease-in-out infinite; }
 
         /* Pista: "Deslizá para ver Bebidas / Comidas". Aparece unos segundos y se va sola */
         #pista-deslizar {
@@ -813,7 +813,7 @@
             .section-title, .logo-image-container, .seccion-visible, .nav-btn:not(.active-btn) { animation: none; }
             .seccion-visible.desde-der, .seccion-visible.desde-izq { animation: none; }
             #magic-bg, .sparkle { display: none; }
-            #zoom #zoom-prev, #zoom #zoom-next, #zoom .zd-izq, #zoom .zd-der { animation: none; }
+            #zoom #zoom-prev, #zoom #zoom-next, #zoom .zd-arr, #zoom .zd-aba { animation: none; }
             #pista-deslizar.visible .ps-izq, #pista-deslizar.visible .ps-der { animation: none; }
             #pista-tocar { transition: none; }
         }
@@ -875,10 +875,10 @@
         <div class="zoom-desc" id="zoom-desc"></div>
         <div class="zoom-precio" id="zoom-precio"></div>
         <div id="zoom-contador"></div>
-        <button id="zoom-prev" class="zoom-flecha" type="button" aria-label="Anterior">‹</button>
-        <button id="zoom-next" class="zoom-flecha" type="button" aria-label="Siguiente">›</button>
+        <button id="zoom-prev" class="zoom-flecha" type="button" aria-label="Anterior">▲</button>
+        <button id="zoom-next" class="zoom-flecha" type="button" aria-label="Siguiente">▼</button>
         <div id="zoom-pie">
-            <div id="zoom-deslizar"><span class="zd-chev zd-izq">‹</span><span>Deslizá para ver más</span><span class="zd-chev zd-der">›</span></div>
+            <div id="zoom-deslizar"><span class="zd-chev zd-arr">▲</span><span>Deslizá para ver más</span><span class="zd-chev zd-aba">▼</span></div>
             <button id="zoom-cerrar" type="button" aria-label="Cerrar">✕</button>
             <div id="zoom-ayuda">Tocá para cerrar</div>
         </div>
@@ -1517,7 +1517,7 @@
             pistasMostradas++;
             const partes = [zoomImg].concat(zoomTextos.map(t => t.destino));
             zoomPista = partes.map(e => e.animate(
-                [{ transform: 'none' }, { transform: 'translateX(-30px)', offset: 0.3 }, { transform: 'translateX(30px)', offset: 0.7 }, { transform: 'none' }],
+                [{ transform: 'none' }, { transform: 'translateY(-30px)', offset: 0.3 }, { transform: 'translateY(30px)', offset: 0.7 }, { transform: 'none' }],
                 { duration: 1200, delay: 500, easing: 'ease-in-out' }
             ));
         }
@@ -1602,7 +1602,7 @@
             const mover = 70 * dir;
             const partes = [zoomImg].concat(zoomTextos.map(t => t.destino));
             const salida = partes.map(e => e.animate(
-                [{ transform: 'none', opacity: 1 }, { transform: 'translateX(' + (-mover) + 'px)', opacity: 0 }],
+                [{ transform: 'none', opacity: 1 }, { transform: 'translateY(' + (-mover) + 'px)', opacity: 0 }],
                 { duration: 180, easing: 'ease-in', fill: 'forwards' }
             ));
             Promise.all(salida.map(a => a.finished)).catch(function() {}).then(function() {
@@ -1626,7 +1626,7 @@
                 } catch (err) {}
                 salida.forEach(a => a.cancel());
                 const entrada = partes.map((e, i) => e.animate(
-                    [{ transform: 'translateX(' + mover + 'px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+                    [{ transform: 'translateY(' + mover + 'px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
                     { duration: 300, delay: i * 40, easing: EASE_ZOOM, fill: 'backwards' }
                 ));
                 Promise.all(entrada.map(a => a.finished)).catch(function() {}).then(function() { zoomAnimando = false; });
@@ -1773,10 +1773,19 @@
         });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') cerrarZoom();
-            if (e.key === 'ArrowRight') navegarZoom(1);
-            if (e.key === 'ArrowLeft') navegarZoom(-1);
+            if (e.key === 'ArrowDown') navegarZoom(1);
+            if (e.key === 'ArrowUp') navegarZoom(-1);
         });
-        // Deslizar el dedo a los costados dentro del zoom: plato anterior / siguiente
+        // Rueda del mouse o trackpad dentro del zoom: plato siguiente (hacia abajo) / anterior (hacia arriba).
+        // Con una pausa corta para que el impulso del trackpad no salte varios platos de una vez.
+        let ruedaHasta = 0;
+        window.addEventListener('wheel', function(e) {
+            if (!zoomEl.classList.contains('abierto') || Math.abs(e.deltaY) < 20 || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+            if (performance.now() < ruedaHasta) return;
+            ruedaHasta = performance.now() + 700;
+            navegarZoom(e.deltaY > 0 ? 1 : -1);
+        }, { passive: true });
+        // Deslizar el dedo hacia arriba / abajo dentro del zoom, como el scroll: plato siguiente / anterior
         let swipeX = 0, swipeY = 0, swipeActivo = false;
         zoomEl.addEventListener('pointerdown', function(e) { swipeX = e.clientX; swipeY = e.clientY; swipeActivo = true; });
         zoomEl.addEventListener('pointercancel', function() { swipeActivo = false; });
@@ -1784,9 +1793,9 @@
             if (!swipeActivo) return;
             swipeActivo = false;
             const dx = e.clientX - swipeX, dy = e.clientY - swipeY;
-            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+            if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5) {
                 ignorarClickHasta = performance.now() + 400;
-                navegarZoom(dx < 0 ? 1 : -1);
+                navegarZoom(dy < 0 ? 1 : -1); // dedo hacia arriba = siguiente, igual que al scrollear la lista
             }
         });
         // Bloqueo del scroll mientras dura el zoom (rueda, dedo y teclado)
