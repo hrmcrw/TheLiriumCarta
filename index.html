@@ -222,7 +222,10 @@
             background: rgba(5, 10, 5, 0.96);
             border-bottom: 2px solid var(--gold);
             box-shadow: 0 8px 24px -10px var(--gold-glow);
+            transition: top 0.3s ease;
         }
+        /* Al bajar, el logo se esconde y quedan solo las categorías; al subir un poco, vuelve */
+        .top-fixed.compacto { top: calc(var(--header-h, 120px) * -1); }
 
         header {
             text-align: center;
@@ -723,7 +726,23 @@
         #zoom .zoom-precio .item-price { font-size: 1.3rem; }
         #zoom .zoom-precio .size { font-size: 0.95rem; }
         #zoom { touch-action: none; }
-        #zoom #zoom-prev, #zoom #zoom-next, #zoom #zoom-contador, #zoom #zoom-pie { position: absolute; }
+        #zoom #zoom-prev, #zoom #zoom-next, #zoom #zoom-contador, #zoom #zoom-pie, #zoom #zoom-progreso { position: absolute; }
+
+        /* Línea de posición sobre el borde izquierdo: la marca baja a medida que se avanza de plato */
+        #zoom #zoom-progreso {
+            left: 14px; top: 50%;
+            width: 3px; height: 180px; margin-top: -90px;
+            border-radius: 3px;
+            background: rgba(212, 175, 55, 0.28);
+        }
+        #zoom-progreso-marca {
+            position: absolute; left: -1px; width: 5px; top: 0; height: 24px;
+            border-radius: 5px;
+            background: var(--gold-gradient);
+            box-shadow: 0 0 8px var(--gold-glow);
+            transition: top 0.3s ease;
+        }
+        @media (prefers-reduced-motion: reduce) { #zoom-progreso-marca { transition: none; } }
 
         /* Contador arriba: "3 / 12" */
         #zoom #zoom-contador {
@@ -815,6 +834,7 @@
         /* Respeta a quien tiene animaciones reducidas en su celular */
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
+            .top-fixed { transition: none; }
             .reveal { opacity: 1; transform: none; transition: none; }
             .section-title, .logo-image-container, .seccion-visible, .nav-btn:not(.active-btn) { animation: none; }
             .seccion-visible.desde-der, .seccion-visible.desde-izq { animation: none; }
@@ -892,6 +912,7 @@
         <div class="zoom-desc" id="zoom-desc"></div>
         <div class="zoom-precio" id="zoom-precio"></div>
         <div id="zoom-contador"></div>
+        <div id="zoom-progreso" aria-hidden="true"><div id="zoom-progreso-marca"></div></div>
         <button id="zoom-prev" class="zoom-flecha" type="button" aria-label="Anterior">▲</button>
         <button id="zoom-next" class="zoom-flecha" type="button" aria-label="Siguiente">▼</button>
         <div id="zoom-pie">
@@ -1053,6 +1074,11 @@
         function medirBarraFija() {
             const t = document.getElementById('top-fixed');
             document.documentElement.style.setProperty('--top-h', (t.offsetHeight + 12) + 'px');
+            // con el logo escondido, la barra visible mide solo las categorías
+            const hd = t.querySelector('header');
+            const hh = hd ? hd.offsetHeight : 0;
+            document.documentElement.style.setProperty('--header-h', hh + 'px');
+            document.documentElement.style.setProperty('--top-h-compacto', (t.offsetHeight - hh + 12) + 'px');
             const b = document.getElementById('bottom-nav');
             if (b) document.documentElement.style.setProperty('--bottom-h', b.offsetHeight + 'px');
         }
@@ -1092,6 +1118,7 @@
             boton.setAttribute('aria-selected', 'true');
 
             document.body.classList.add('sin-latido'); // ya encontró las pestañas: el botón deja de latir
+            if (typeof ocultarPistaDeslizar === 'function') ocultarPistaDeslizar();
             medirBarraFija();
             programarChips();
             if (!sinScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1517,7 +1544,7 @@
         const zoomNext = document.getElementById('zoom-next');
         const zoomContador = document.getElementById('zoom-contador');
         const zoomDeslizar = document.getElementById('zoom-deslizar');
-        const zoomExtras = ['zoom-prev', 'zoom-next', 'zoom-contador', 'zoom-deslizar'].map(id => document.getElementById(id));
+        const zoomExtras = ['zoom-prev', 'zoom-next', 'zoom-contador', 'zoom-progreso', 'zoom-deslizar'].map(id => document.getElementById(id));
 
         // Pista de deslizar: las primeras veces que se abre el zoom, la foto se mece un poco hacia los costados
         let zoomPista = [], pistasMostradas = 0;
@@ -1587,6 +1614,12 @@
             zoomContador.textContent = (i + 1) + ' / ' + lista.length;
             const hayMas = lista.length > 1;
             zoomContador.style.visibility = hayMas ? 'visible' : 'hidden';
+            // la marca se reparte en el largo de la línea según el lugar que ocupa el plato
+            const hilo = document.getElementById('zoom-progreso'), marca = document.getElementById('zoom-progreso-marca');
+            hilo.style.visibility = hayMas ? 'visible' : 'hidden';
+            const largo = hilo.offsetHeight, alto = Math.max(14, Math.min(40, largo / lista.length));
+            marca.style.height = alto + 'px';
+            marca.style.top = (lista.length > 1 ? i * (largo - alto) / (lista.length - 1) : 0) + 'px';
             zoomDeslizar.style.visibility = hayMas ? 'visible' : 'hidden';
         }
 
@@ -1649,6 +1682,7 @@
             if (!foto || zoomAnimando) return; // sin foto no hay nada que agrandar
             ocultarPistaTocar(); // ya descubrió el gesto: el aviso no vuelve a salir
             recordarPistaTocar();
+            ocultarPistaDeslizar();
             zoomTarjeta = tarjeta;
             zoomAnimando = true;
 
@@ -1861,7 +1895,7 @@
                 return t && t.offsetParent !== null;
             });
             if (chips.length) {
-                const limite = document.getElementById('top-fixed').offsetHeight + 40;
+                const limite = document.getElementById('top-fixed').getBoundingClientRect().bottom + 40;
                 let activo = chips[0];
                 chips.forEach(function(c) {
                     const t = document.querySelector(c.getAttribute('href'));
@@ -1896,8 +1930,11 @@
                 mostrarSeccion(seccion, document.getElementById('tab-' + seccion), true);
                 document.getElementById('seccion-' + seccion).classList.add(seccion === 'bebidas' ? 'desde-der' : 'desde-izq');
             }
-            const alturaBarra = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-h')) || 230;
-            window.scrollTo({ top: Math.max(0, topAbsoluto(destino) - alturaBarra), behavior: 'smooth' });
+            // bajando, el logo se esconde y la barra mide menos; subiendo, vuelve a mostrarse completa
+            const yDestino = topAbsoluto(destino);
+            const bajando = yDestino > window.scrollY + 10;
+            const alturaBarra = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(bajando ? '--top-h-compacto' : '--top-h')) || 230;
+            window.scrollTo({ top: Math.max(0, yDestino - alturaBarra), behavior: 'smooth' });
         });
 
         let chipsPendiente = false;
@@ -1906,6 +1943,19 @@
             chipsPendiente = true;
             requestAnimationFrame(function() { chipsPendiente = false; actualizarChips(); });
         }
+        // Encabezado que se esconde al bajar y vuelve al subir un poco (con margen para no titilar)
+        let ultimoY = window.scrollY;
+        function actualizarEncabezado() {
+            const barra = document.getElementById('top-fixed');
+            const y = Math.max(0, window.scrollY);
+            if (zoomBloqueado) { ultimoY = y; return; }
+            const dy = y - ultimoY;
+            if (y < 60) barra.classList.remove('compacto');
+            else if (dy > 8) barra.classList.add('compacto');
+            else if (dy < -8) barra.classList.remove('compacto');
+            if (Math.abs(dy) > 8 || y < 60) ultimoY = y;
+        }
+        window.addEventListener('scroll', actualizarEncabezado, { passive: true });
         window.addEventListener('scroll', programarChips, { passive: true });
         window.addEventListener('resize', programarChips);
         window.addEventListener('load', programarChips);
@@ -1916,6 +1966,7 @@
         // DESLIZAR A LOS COSTADOS: cambia entre Comidas y Bebidas
         // =========================================
         function cambiarPestana(seccion, dir) {
+            recordarSwipe(); // ya descubrió que se puede deslizar: el aviso no vuelve
             mostrarSeccion(seccion, document.getElementById('tab-' + seccion));
             document.getElementById('seccion-' + seccion).classList.add(dir > 0 ? 'desde-der' : 'desde-izq');
         }
@@ -1972,6 +2023,42 @@
         }
         function agendarPistaTocar() { setTimeout(function() { intentarPistaTocar(0); }, 2500); }
         // (se agenda desde terminarCarga, cuando la pantalla de carga ya se fue)
+
+        // =========================================
+        // AVISO "DESLIZÁ PARA VER BEBIDAS / COMIDAS"
+        // Sale unos segundos (después del aviso de las fotos), hasta 3 visitas, y se va para siempre
+        // cuando la persona cambia de pestaña deslizando.
+        // =========================================
+        const pistaDeslizar = document.getElementById('pista-deslizar');
+        const CLAVE_PISTA_DESLIZAR = 'lirium-pista-deslizar-v1';
+        let pistaDeslizarTimer = null;
+
+        function leerPistaDeslizar() {
+            try { return parseInt(localStorage.getItem(CLAVE_PISTA_DESLIZAR), 10) || 0; } catch (e) { return 0; }
+        }
+        function guardarPistaDeslizar(n) {
+            try { localStorage.setItem(CLAVE_PISTA_DESLIZAR, String(n)); } catch (e) {}
+        }
+        function recordarSwipe() { guardarPistaDeslizar(99); ocultarPistaDeslizar(); }
+        function ocultarPistaDeslizar() {
+            clearTimeout(pistaDeslizarTimer);
+            pistaDeslizar.classList.remove('visible');
+        }
+        function mostrarPistaDeslizar() {
+            if (leerPistaDeslizar() >= 3) return;
+            if (zoomEl.classList.contains('abierto') || zoomAnimando) return;
+            const enComidas = document.getElementById('seccion-comidas').classList.contains('seccion-visible');
+            pistaDeslizar.classList.toggle('en-comidas', enComidas);
+            pistaDeslizar.classList.toggle('en-bebidas', !enComidas);
+            document.getElementById('pista-texto').textContent = enComidas ? 'Deslizá para ver Bebidas' : 'Deslizá para ver Comidas';
+            pistaDeslizar.classList.add('visible');
+            guardarPistaDeslizar(leerPistaDeslizar() + 1);
+            pistaDeslizarTimer = setTimeout(ocultarPistaDeslizar, 6000);
+        }
+        function agendarPistaDeslizar() {
+            if (leerPistaDeslizar() >= 3) return;
+            setTimeout(mostrarPistaDeslizar, 10000); // después del aviso de "Tocá una foto"
+        }
 
 // =========================================
         // PLANILLA DE GOOGLE: lee la carta publicada como CSV y actualiza la página si cambió
@@ -2118,6 +2205,7 @@
                 setTimeout(function() { pantallaCarga.remove(); }, 600);
             }
             agendarPistaTocar();
+            agendarPistaDeslizar();
         }
 
         async function arrancarCarga() {
@@ -2146,6 +2234,13 @@
         }
         setTimeout(terminarCarga, 25000); // seguro: nunca queda trabada la pantalla de carga
         arrancarCarga();
+
+        // Modo sin internet: sw.js guarda la carta, las fotos y las fuentes en el celular (archivo aparte, misma carpeta)
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').catch(function() {});
+            });
+        }
 
 botonSonido.addEventListener('click', function() {
             iniciarAudio();
