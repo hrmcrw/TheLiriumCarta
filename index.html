@@ -672,7 +672,6 @@
             gap: 16px;
             /* espacio abajo para el botón de cerrar y la pista de deslizar; arriba para el contador */
             padding: 52px 24px calc(124px + env(safe-area-inset-bottom, 0px));
-            cursor: pointer;
             text-align: center;
         }
         #zoom.abierto { display: flex; }
@@ -880,7 +879,7 @@
         <div id="zoom-pie">
             <div id="zoom-deslizar"><span class="zd-chev zd-arr">▲</span><span>Deslizá para ver más</span><span class="zd-chev zd-aba">▼</span></div>
             <button id="zoom-cerrar" type="button" aria-label="Cerrar">✕</button>
-            <div id="zoom-ayuda">Tocá para cerrar</div>
+            <div id="zoom-ayuda">Volvé atrás para cerrar</div>
         </div>
     </div>
 
@@ -1002,7 +1001,7 @@
             const desc = it.desc ? '<span class="item-desc">' + it.desc + '</span>' : '';
             if (esTrago) {
                 return '<div class="drink-item reveal">' +
-                    '<span class="drink-wrap"><img src="' + (it.imagen || nombreDeArchivo(it.nombre)) + '.webp" alt="' + esc(it.nombre) + '" class="drink-img" width="96" height="120" loading="lazy" decoding="async" onerror="fotoTragoFaltante(this)"></span>' +
+                    '<span class="drink-wrap"><img src="' + esc(it.imagen || nombreDeArchivo(it.nombre)) + '.webp" alt="' + esc(it.nombre) + '" class="drink-img" width="96" height="120" loading="lazy" decoding="async" onerror="fotoTragoFaltante(this)"></span>' +
                     '<div class="drink-info">' + nombre + desc + '</div>' +
                     '<span class="item-price">' + precio(it.precio) + '</span></div>';
             }
@@ -1502,7 +1501,7 @@
         const zoomBarraInf = document.getElementById('bottom-nav'); // Comidas / Bebidas
         function distanciaBarraInf() { return Math.ceil(zoomBarraInf.getBoundingClientRect().height) + 40; }
         let zoomTarjeta = null, zoomAnimando = false, zoomBarraAnim = null, zoomBarraInfAnim = null;
-        let zoomBloqueado = false, zoomScrollY = 0;
+        let zoomBloqueado = false, zoomScrollY = 0, zoomHistoria = false;
         const zoomPrev = document.getElementById('zoom-prev');
         const zoomNext = document.getElementById('zoom-next');
         const zoomContador = document.getElementById('zoom-contador');
@@ -1642,6 +1641,9 @@
             zoomTarjeta = tarjeta;
             zoomAnimando = true;
 
+            // El zoom se apoya en el historial: el botón "atrás" del celular consume esta entrada y lo cierra
+            try { history.pushState({ zoom: true }, ''); zoomHistoria = true; } catch (err) { zoomHistoria = false; }
+
             cargarEnZoom(tarjeta);
 
             // El scroll se frena sin tocar "overflow": el body tiene overflow-x oculto y, si el html
@@ -1758,21 +1760,42 @@
             });
         }
 
+        // Pedir el cierre = volver atrás en el historial; el listener de "popstate" hace el cierre animado.
+        // Así el botón atrás, el gesto de volver, la ✕ y Escape pasan todos por el mismo camino.
+        function pedirCierreZoom() {
+            if (!zoomEl.classList.contains('abierto')) return;
+            if (zoomHistoria) { try { history.back(); return; } catch (err) {} }
+            zoomHistoria = false;
+            cerrarZoom();
+        }
+        // Si "atrás" llega en medio de una animación, se espera a que termine y recién ahí se cierra
+        function cerrarCuandoPueda() {
+            if (!zoomEl.classList.contains('abierto') && !zoomAnimando) return;
+            if (zoomAnimando || !zoomEl.classList.contains('abierto')) { setTimeout(cerrarCuandoPueda, 80); return; }
+            cerrarZoom();
+        }
+        window.addEventListener('popstate', function() {
+            if (!zoomHistoria) return;
+            zoomHistoria = false;
+            cerrarCuandoPueda();
+        });
+
         let ignorarClickHasta = 0;
         document.addEventListener('click', function(e) {
             if (performance.now() < ignorarClickHasta) return; // el toque final de un deslizamiento no cierra
             if (zoomAnimando) return;
             if (zoomEl.classList.contains('abierto')) {
+                // Con el zoom abierto, tocar la pantalla ya no lo cierra: solo flechas y ✕
                 const flecha = e.target.closest('.zoom-flecha');
                 if (flecha) { navegarZoom(flecha.id === 'zoom-next' ? 1 : -1); return; }
-                cerrarZoom();
+                if (e.target.closest('#zoom-cerrar')) pedirCierreZoom();
                 return;
             }
             const tarjeta = e.target.closest('.menu-item, .drink-item');
             if (tarjeta) abrirZoom(tarjeta);
         });
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') cerrarZoom();
+            if (e.key === 'Escape') pedirCierreZoom();
             if (e.key === 'ArrowDown') navegarZoom(1);
             if (e.key === 'ArrowUp') navegarZoom(-1);
         });
