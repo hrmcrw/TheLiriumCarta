@@ -594,6 +594,73 @@
 
         /* Zoom al tocar un plato o bebida */
         .con-foto, .drink-item { cursor: pointer; }
+
+        /* Ícono de ampliar: marca las fotos que se pueden tocar (solo si la imagen existe) */
+        .con-foto .foto-slot::after,
+        .drink-wrap:has(.drink-img)::after {
+            content: '⤢';
+            position: absolute;
+            right: -2px;
+            bottom: 0;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(5, 10, 5, 0.88);
+            border: 1px solid rgba(212, 175, 55, 0.75);
+            color: var(--gold);
+            font-size: 0.85rem;
+            line-height: 1;
+            pointer-events: none;
+        }
+        .drink-wrap { position: relative; flex: 0 0 auto; display: flex; }
+        /* mientras la foto está agrandada en el zoom, el ícono de la tarjeta se oculta */
+        .foto-slot:has(.item-foto[style*="hidden"])::after,
+        .drink-wrap:has(.drink-img[style*="hidden"])::after { opacity: 0; }
+
+        /* Aviso "tocá una foto": aparece una sola vez y se va solo */
+        #pista-tocar {
+            position: fixed;
+            left: 16px;
+            bottom: calc(var(--bottom-h, 72px) + 14px);
+            max-width: calc(100vw - 92px);
+            z-index: 54;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 18px;
+            background: rgba(5, 10, 5, 0.94);
+            border: 1.5px solid rgba(212, 175, 55, 0.75);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            line-height: 1.35;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        #pista-tocar.visible { opacity: 1; transform: none; }
+        #pista-tocar .pt-icono {
+            flex: 0 0 auto;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.75);
+            color: var(--gold);
+            font-size: 0.85rem;
+            line-height: 1;
+        }
         #zoom {
             position: fixed;
             inset: 0;
@@ -748,6 +815,7 @@
             #magic-bg, .sparkle { display: none; }
             #zoom #zoom-prev, #zoom #zoom-next, #zoom .zd-izq, #zoom .zd-der { animation: none; }
             #pista-deslizar.visible .ps-izq, #pista-deslizar.visible .ps-der { animation: none; }
+            #pista-tocar { transition: none; }
         }
 
         @media (max-width: 420px) {
@@ -818,6 +886,8 @@
 
     <div id="pista-deslizar" class="en-comidas" aria-hidden="true"><span class="ps-chev ps-izq">‹</span><span id="pista-texto">Deslizá para ver Bebidas</span><span class="ps-chev ps-der">›</span></div>
 
+    <div id="pista-tocar" aria-hidden="true"><span class="pt-icono">⤢</span><span>Tocá una foto para verla en grande</span></div>
+
     <button class="sound-toggle off" id="sound-toggle" type="button" aria-label="Activar o silenciar sonido" title="Sonido">🔇</button>
     <button class="arriba-btn" id="arriba-btn" type="button" aria-label="Volver arriba" title="Volver arriba">↑</button>
 
@@ -831,8 +901,9 @@
         //  - Agregar un plato:     copiar una línea { nombre: ... } y pegarla donde corresponda
         //  - Quitar un plato:      borrar su línea
         //  - Un plato con dos tamaños usa  tamanos: [['Chica', 15500], ['XXL', 20500]]
-        //  - La foto de cada plato se busca sola por su nombre (ej: panceta.webp,
-        //    rucula-y-jamon-crudo.webp). Si el archivo tiene otro nombre, agregar  foto: 'nombre-del-archivo'
+        //  - Los platos con foto llevan  foto: true  y la imagen se busca por su nombre
+        //    (ej: panceta.webp, rucula-y-jamon-crudo.webp). Si el archivo tiene otro nombre,
+        //    usar  foto: 'nombre-del-archivo'. Sin la marca  foto, no se busca ninguna imagen.
         //  - Las bebidas con alcohol llevan  imagen: 'archivo'  (sin la extensión .webp)
         // =========================================================================
         const CARTA = {
@@ -857,9 +928,9 @@
                     { nombre: 'Especial con morrón', desc: 'Salsa de tomate, muzzarella, jamón, morrón y aceitunas.', precio: 27500 },
                     { nombre: 'Cuatro Quesos', desc: 'Salsa de tomate, selección de cuatro quesos y aceitunas.', precio: 29500 },
                     { nombre: 'Fugazzetta', desc: 'Salsa de tomate, muzzarella, cebolla, orégano y aceitunas.', precio: 27500 },
-                    { nombre: 'Rúcula y jamón crudo', desc: 'Salsa de tomate, muzzarella, rúcula fresca, jamón crudo, parmesano y aceitunas.', precio: 30000 },
+                    { nombre: 'Rúcula y jamón crudo', foto: true, desc: 'Salsa de tomate, muzzarella, rúcula fresca, jamón crudo, parmesano y aceitunas.', precio: 30000 },
                     { nombre: 'Napolitana', desc: 'Salsa de tomate, muzzarella, tomate, ajo, orégano y aceitunas.', precio: 27500 },
-                    { nombre: 'Panceta', desc: 'Salsa de tomate, muzzarella, panceta, aceitunas y orégano.', precio: 27500 }
+                    { nombre: 'Panceta', foto: true, desc: 'Salsa de tomate, muzzarella, panceta, aceitunas y orégano.', precio: 27500 }
                 ]}
             ],
             bebidas: [
@@ -891,12 +962,20 @@
         }
         function precio(n) { return '$' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 
+        // Si falta la imagen de un trago, se reemplaza por el mismo espacio reservado que usan las comidas
+        function fotoTragoFaltante(img) {
+            const slot = document.createElement('span');
+            slot.className = 'foto-slot';
+            slot.setAttribute('aria-hidden', 'true');
+            img.replaceWith(slot);
+        }
+
         function htmlItem(it, esTrago) {
             const nombre = '<span class="item-name">' + esc(it.nombre) + '</span>';
             const desc = it.desc ? '<span class="item-desc">' + it.desc + '</span>' : '';
             if (esTrago) {
                 return '<div class="drink-item reveal">' +
-                    '<img src="' + it.imagen + '.webp" alt="' + esc(it.nombre) + '" class="drink-img" width="96" height="120" loading="lazy" decoding="async">' +
+                    '<span class="drink-wrap"><img src="' + it.imagen + '.webp" alt="' + esc(it.nombre) + '" class="drink-img" width="96" height="120" loading="lazy" decoding="async" onerror="fotoTragoFaltante(this)"></span>' +
                     '<div class="drink-info">' + nombre + desc + '</div>' +
                     '<span class="item-price">' + precio(it.precio) + '</span></div>';
             }
@@ -906,7 +985,7 @@
                 }).join('') + '</div>'
                 : '<div class="item-price">' + precio(it.precio) + (it.unidad ? ' ' + esc(it.unidad) : '') + '</div>';
             return '<div class="menu-item' + (it.tamanos ? ' variantes' : '') + ' reveal"' +
-                (it.foto ? ' data-foto="' + esc(it.foto) + '"' : '') + '>' +
+                (it.foto ? ' data-foto="' + (it.foto === true ? '1' : esc(it.foto)) + '"' : '') + '>' +
                 '<div>' + nombre + desc + '</div>' + precios + '</div>';
         }
 
@@ -1019,8 +1098,11 @@
             slot.setAttribute('aria-hidden', 'true');
             tarjeta.classList.add('con-espacio');
             tarjeta.insertBefore(slot, tarjeta.firstChild);
-            // data-foto permite que el archivo tenga un nombre distinto al del plato
-            busquedasDeFoto.push(function() { ponerFoto(tarjeta, tarjeta.dataset.foto || nombreDeArchivo(nombre), nombre, 0); });
+            // Solo se busca la foto de los platos marcados con foto en CARTA (sin consultas fallidas).
+            // data-foto trae el nombre del archivo, o '1' si coincide con el del plato.
+            const archivo = tarjeta.dataset.foto;
+            if (!archivo) return;
+            busquedasDeFoto.push(function() { ponerFoto(tarjeta, archivo === '1' ? nombreDeArchivo(nombre) : archivo, nombre, 0); });
         });
 
         // Las fotos se buscan recién cuando terminó de cargar lo principal (logo, fondo, textos),
@@ -1519,6 +1601,8 @@
         function abrirZoom(tarjeta) {
             const foto = tarjeta.querySelector(SELECTOR_FOTO);
             if (!foto || zoomAnimando) return; // sin foto no hay nada que agrandar
+            ocultarPistaTocar(); // ya descubrió el gesto: el aviso no vuelve a salir
+            recordarPistaTocar();
             zoomTarjeta = tarjeta;
             zoomAnimando = true;
 
@@ -1773,6 +1857,41 @@
             if (dx < 0 && enComidas) cambiarPestana('bebidas', 1);
             else if (dx > 0 && !enComidas) cambiarPestana('comidas', -1);
         }, { passive: true });
+
+// =========================================
+        // AVISO "TOCÁ UNA FOTO": sale una sola vez, unos segundos, cuando ya hay fotos a la vista
+        // =========================================
+        const pistaTocar = document.getElementById('pista-tocar');
+        const CLAVE_PISTA_TOCAR = 'lirium-pista-tocar';
+        let pistaTocarTimer = null;
+
+        function pistaTocarYaVista() {
+            try { return localStorage.getItem(CLAVE_PISTA_TOCAR) === '1'; } catch (e) { return false; }
+        }
+        function recordarPistaTocar() {
+            try { localStorage.setItem(CLAVE_PISTA_TOCAR, '1'); } catch (e) {}
+        }
+        function ocultarPistaTocar() {
+            clearTimeout(pistaTocarTimer);
+            pistaTocar.classList.remove('visible');
+        }
+        function hayFotoVisible() {
+            return Array.from(document.querySelectorAll('.con-foto, .drink-img')).some(function(e) { return e.offsetParent !== null; });
+        }
+        // Las fotos se cargan después de lo principal: se reintenta unas veces hasta que haya alguna a la vista
+        function intentarPistaTocar(n) {
+            if (pistaTocarYaVista()) return;
+            if (hayFotoVisible()) {
+                pistaTocar.classList.add('visible');
+                recordarPistaTocar();
+                pistaTocarTimer = setTimeout(ocultarPistaTocar, 6000);
+            } else if (n < 4) {
+                setTimeout(function() { intentarPistaTocar(n + 1); }, 1500);
+            }
+        }
+        function agendarPistaTocar() { setTimeout(function() { intentarPistaTocar(0); }, 2500); }
+        if (document.readyState === 'complete') agendarPistaTocar();
+        else window.addEventListener('load', agendarPistaTocar);
 
 botonSonido.addEventListener('click', function() {
             iniciarAudio();
