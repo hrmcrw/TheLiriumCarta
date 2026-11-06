@@ -27,6 +27,7 @@
     <!-- Velocidad: conexión anticipada a las fuentes y precarga del fondo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="loading-page.png" as="image" fetchpriority="high">
     <link rel="preload" href="fondovertical.webp" as="image" type="image/webp">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 
@@ -57,6 +58,46 @@
             -webkit-touch-callout: none;
         }
         img { -webkit-user-drag: none; user-drag: none; }
+
+        /* =========================================
+           PANTALLA DE CARGA: fondo negro, el gráfico centrado y la barra debajo
+           ========================================= */
+        #cargando {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            padding: 24px;
+            touch-action: none;
+            transition: opacity 0.5s ease;
+        }
+        #cargando.salida { opacity: 0; pointer-events: none; }
+        #cargando img { width: min(72vw, 380px); max-height: 55vh; height: auto; object-fit: contain; }
+        #cargando-pista {
+            width: min(60vw, 260px);
+            height: 10px;
+            border-radius: 999px;
+            background: #000;
+            border: 1.5px solid rgba(212, 175, 55, 0.75);
+            overflow: hidden;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+        }
+        #cargando-barra {
+            height: 100%;
+            width: 4%;
+            border-radius: 999px;
+            background: var(--gold-gradient);
+            transition: width 0.35s ease;
+        }
+        /* mientras carga, las animaciones de la página esperan para empezar cuando se muestre */
+        body.cargando > :not(#cargando),
+        body.cargando > :not(#cargando) * { animation-play-state: paused !important; }
+        @media (prefers-reduced-motion: reduce) { #cargando, #cargando-barra { transition: none; } }
 
         /* =========================================
            1. FONDO (funciona también en iPhone)
@@ -823,7 +864,18 @@
         }
     </style>
 </head>
-<body>
+<body class="cargando">
+
+    <!-- PANTALLA DE CARGA (el gráfico es loading-page.png, en la misma carpeta que este archivo) -->
+    <div id="cargando" role="status" aria-live="polite" aria-label="Cargando la carta">
+        <img src="loading-page.png" alt="" fetchpriority="high" onerror="this.style.display='none'">
+        <div id="cargando-pista"><div id="cargando-barra"></div></div>
+    </div>
+    <noscript><style>#cargando { display: none; }</style></noscript>
+    <script>
+        // Seguro: si por algún motivo el script principal no termina, la pantalla de carga se va igual
+        setTimeout(function() { var c = document.getElementById('cargando'); if (c) { c.style.display = 'none'; document.body.classList.remove('cargando'); } }, 30000);
+    </script>
 
     <!-- CAPAS DE FONDO -->
     <div class="parallax-bg"></div>
@@ -904,6 +956,7 @@
         //
         // Los cambios hechos en la planilla tardan unos minutos en llegar a la carta.
         // =========================================================================
+        let cargaTerminada = false; // pasa a true cuando la pantalla de carga se va
         const URL_PLANILLA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_26TXFhx_aDjYmBiMewKKBzJMOY2GmlT03bxBzvnJG-kphynUmG0k2Np66Fn-kg/pub?gid=560076241&single=true&output=csv';
         const CLAVE_CACHE_CARTA = 'lirium-carta-v1';
         function leerCacheCarta() {
@@ -1056,7 +1109,7 @@
         }, { threshold: 0.05, rootMargin: "0px 0px -5% 0px" });
 
         function observarReveal() { document.querySelectorAll('.reveal:not(.active)').forEach(el => observer.observe(el)); }
-        observarReveal();
+        // observarReveal() se llama recién cuando se va la pantalla de carga, para que las tarjetas aparezcan con su animación
 
         // =========================================
         // 2. CAMBIAR ENTRE PESTAÑAS
@@ -1103,6 +1156,7 @@
             if (i >= EXTENSIONES_FOTO.length) return;
             const probe = new Image();
             probe.onload = function() {
+                if (tarjeta.querySelector('.item-foto')) return; // ya tiene su foto (evita duplicarla)
                 const slot = tarjeta.querySelector('.foto-slot');
                 const img = document.createElement('img');
                 img.src = probe.src;
@@ -1140,15 +1194,8 @@
         }
         prepararFotos();
 
-        // Las fotos se buscan recién cuando terminó de cargar lo principal (logo, fondo, textos),
-        // para que no le compitan por la conexión
+        // Las fotos se ponen en las tarjetas cuando la pantalla de carga termina de descargarlas (ver arrancarCarga)
         function lanzarBusquedasDeFoto() { busquedasDeFoto.forEach(function(buscar) { buscar(); }); }
-        function agendarBusquedasDeFoto() {
-            if (window.requestIdleCallback) requestIdleCallback(lanzarBusquedasDeFoto, { timeout: 1500 });
-            else setTimeout(lanzarBusquedasDeFoto, 300);
-        }
-        if (document.readyState === 'complete') agendarBusquedasDeFoto();
-        else window.addEventListener('load', agendarBusquedasDeFoto);
 
         // =========================================
         // 3. PARTÍCULAS (menos cantidad = más fluido)
@@ -1958,8 +2005,7 @@
             }
         }
         function agendarPistaTocar() { setTimeout(function() { intentarPistaTocar(0); }, 2500); }
-        if (document.readyState === 'complete') agendarPistaTocar();
-        else window.addEventListener('load', agendarPistaTocar);
+        // (se agenda desde terminarCarga, cuando la pantalla de carga ya se fue)
 
 // =========================================
         // PLANILLA DE GOOGLE: lee la carta publicada como CSV y actualiza la página si cambió
@@ -2045,7 +2091,7 @@
         function repintarCarta() {
             if (zoomAnimando || zoomEl.classList.contains('abierto')) { setTimeout(repintarCarta, 1000); return; }
             dibujarCarta();
-            document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('active'); }); // sin parpadeo
+            if (cargaTerminada) document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('active'); }); // sin parpadeo
             prepararFotos();
             lanzarBusquedasDeFoto();
             chipVisto = null;
@@ -2068,8 +2114,72 @@
                 if (!igual) { CARTA = nueva; repintarCarta(); }
             } catch (e) { /* sin conexión o planilla no disponible: queda la carta que ya se ve */ }
         }
-        if (document.readyState === 'complete') cargarDesdePlanilla();
-        else window.addEventListener('load', cargarDesdePlanilla);
+
+        // =========================================
+        // PANTALLA DE CARGA: lee la planilla, descarga todas las fotos y recién ahí muestra la carta
+        // =========================================
+        const pantallaCarga = document.getElementById('cargando');
+        const barraCarga = document.getElementById('cargando-barra');
+        function progresoCarga(p) { if (barraCarga) barraCarga.style.width = Math.max(4, Math.min(100, p * 100)) + '%'; }
+        function pausa(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+        function precargarImagen(url) {
+            return new Promise(function(listo) {
+                const i = new Image();
+                i.onload = i.onerror = function() { listo(); }; // si una foto no existe, también cuenta como lista
+                i.src = url;
+            });
+        }
+        function urlsDeFotos() {
+            const urls = ['fondovertical.webp', 'logo.webp'];
+            document.querySelectorAll('.menu-item').forEach(function(t) {
+                const a = t.dataset.foto, n = t.querySelector('.item-name');
+                if (!a || a === 'no' || !n) return;
+                urls.push((a === '1' ? nombreDeArchivo(n.textContent.trim()) : a) + '.' + EXTENSIONES_FOTO[0]);
+            });
+            document.querySelectorAll('.drink-img').forEach(function(i) { urls.push(i.getAttribute('src')); });
+            return urls.filter(function(u, i) { return u && urls.indexOf(u) === i; });
+        }
+
+        function terminarCarga() {
+            if (cargaTerminada) return;
+            cargaTerminada = true;
+            document.body.classList.remove('cargando');
+            observarReveal();
+            medirBarraFija();
+            programarChips();
+            if (pantallaCarga) {
+                pantallaCarga.classList.add('salida');
+                setTimeout(function() { pantallaCarga.remove(); }, 600);
+            }
+            agendarPistaTocar();
+        }
+
+        async function arrancarCarga() {
+            const inicio = Date.now();
+            progresoCarga(0.05);
+            try {
+                // 1) la carta definitiva (planilla), con tope de 5 segundos
+                await Promise.race([cargarDesdePlanilla(), pausa(5000)]);
+                // 2) todas las fotos y las fuentes, con tope de 15 segundos
+                const urls = urlsDeFotos();
+                let hechas = 0;
+                const total = urls.length + 1;
+                const paso = function() { hechas++; progresoCarga(0.1 + 0.9 * hechas / total); };
+                const tareas = urls.map(function(u) { return precargarImagen(u).then(paso); });
+                tareas.push(Promise.resolve(document.fonts && document.fonts.ready).catch(function() {}).then(paso));
+                await Promise.race([Promise.all(tareas), pausa(15000)]);
+                // 3) las fotos ya están en caché: se ponen en las tarjetas antes de mostrar la carta
+                lanzarBusquedasDeFoto();
+                await pausa(250);
+                const resto = 700 - (Date.now() - inicio); // que la pantalla no parpadee si todo cargó muy rápido
+                if (resto > 0) await pausa(resto);
+                progresoCarga(1);
+                await pausa(200);
+            } catch (e) { /* ante cualquier problema, se muestra la carta igual */ }
+            terminarCarga();
+        }
+        setTimeout(terminarCarga, 25000); // seguro: nunca queda trabada la pantalla de carga
+        arrancarCarga();
 
 botonSonido.addEventListener('click', function() {
             iniciarAudio();
